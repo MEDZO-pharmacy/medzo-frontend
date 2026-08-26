@@ -1,4 +1,3 @@
-import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -9,6 +8,12 @@ import Contact from './pages/Contact'
 import Products from './pages/Products'
 import ReadMore from './pages/ReadMore'
 import Login from './pages/Login'
+import SignUp from './pages/SignUp'
+import { AuthProvider } from './auth/AuthContext'
+import ProtectedRoute from './auth/ProtectedRoute'
+import PharmacistDashboard from './pages/PharmacistDashboard'
+import InventoryDashboard from './pages/InventoryDashboard'
+import AdminDashboard from './pages/AdminDashboard'
 import './index.css'
 
 const MainLayout = () => {
@@ -24,19 +29,33 @@ const MainLayout = () => {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-white font-sans text-[#1a202c]">
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/about" element={<AboutUs />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/read-more" element={<ReadMore />} />
-          </Route>
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </div>
+      <AuthProvider>
+        <div className="min-h-screen bg-white font-sans text-[#1a202c]">
+          <Routes>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/about" element={<AboutUs />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/read-more" element={<ReadMore />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/products" element={<Products />} />
+              </Route>
+            </Route>
+            <Route element={<ProtectedRoute roles={['Pharmacist']} />}>
+              <Route path="/pharmacist" element={<PharmacistDashboard />} />
+            </Route>
+            <Route element={<ProtectedRoute roles={['InventoryManager']} />}>
+              <Route path="/inventory" element={<InventoryDashboard />} />
+            </Route>
+            <Route element={<ProtectedRoute roles={['Admin']} />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Route>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+          </Routes>
+        </div>
+      </AuthProvider>
     </Router>
   )
 }
