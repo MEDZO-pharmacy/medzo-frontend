@@ -1,10 +1,8 @@
-import React from 'react';
 import { MapPin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
   return (
     <footer className="bg-[#ebf3ff] pt-16 pb-12 px-6 md:px-12">
-      {/* Changed max-w-7xl to w-full or max-w-[95%] to utilize side space */}
       <div className="w-full max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
 
         {/* Brand */}

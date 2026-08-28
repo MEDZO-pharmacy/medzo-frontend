@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Star, Quote, ChevronLeft, ChevronRight, PenSquare, X } from 'lucide-react';
+import { ApiError, createReview, getReviews } from '../services/authApi';
 
 const initialReviews = [
   {
@@ -29,6 +30,8 @@ const Reviews = () => {
   const [reviews, setReviews] = useState(initialReviews);
   const [index, setIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -40,6 +43,19 @@ const Reviews = () => {
   const handleNext = useCallback(() => {
     setIndex((prevIndex) => (prevIndex + 1) % reviews.length);
   }, [reviews.length]);
+
+  useEffect(() => {
+    let active = true;
+    getReviews()
+      .then((items) => {
+        if (active && items.length > 0) {
+          setReviews(items.map((review) => ({ ...review, role: review.customerType })));
+          setIndex(0);
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const handlePrev = useCallback(() => {
     setIndex((prevIndex) => (prevIndex - 1 + reviews.length) % reviews.length);
@@ -56,19 +72,28 @@ const Reviews = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleNext, handlePrev, isModalOpen]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.comment.trim()) return;
 
-    const newReview = {
-      id: Date.now(),
-      ...formData
-    };
-
-    setReviews([newReview, ...reviews]);
-    setIndex(0);
-    setIsModalOpen(false);
-    setFormData({ name: '', role: 'Regular Customer', rating: 5, comment: '' });
+    setIsSubmitting(true);
+    setSubmitError('');
+    try {
+      const saved = await createReview({
+        name: formData.name.trim(),
+        customerType: formData.role,
+        rating: formData.rating,
+        comment: formData.comment.trim(),
+      });
+      setReviews((current) => [{ ...saved, role: saved.customerType }, ...current]);
+      setIndex(0);
+      setIsModalOpen(false);
+      setFormData({ name: '', role: 'Regular Customer', rating: 5, comment: '' });
+    } catch (error) {
+      setSubmitError(error instanceof ApiError ? error.message : 'The review could not be saved.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const currentReview = reviews[index];
@@ -169,6 +194,7 @@ const Reviews = () => {
 
             {/* Review Form */}
             <form onSubmit={handleSubmit} className="space-y-5 text-left">
+              {submitError && <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{submitError}</div>}
 
               {/* Name Input */}
               <div>
@@ -238,9 +264,10 @@ const Reviews = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full gradient-btn text-white font-semibold py-3 rounded-lg transition-all text-sm mt-2"
+                disabled={isSubmitting}
+                className="w-full gradient-btn text-white font-semibold py-3 rounded-lg transition-all text-sm mt-2 disabled:opacity-60"
               >
-                Submit Review
+                {isSubmitting ? 'Saving…' : 'Submit Review'}
               </button>
             </form>
 

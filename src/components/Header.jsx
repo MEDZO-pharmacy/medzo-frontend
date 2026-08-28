@@ -1,9 +1,10 @@
-import React from 'react';
-import { PlusCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { getRoleHome } from '../auth/roleRouting';
 
 const Header = () => {
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -28,9 +29,20 @@ const Header = () => {
 
       {/* Action Buttons */}
       <div className="flex items-center gap-4">
-        <Link to="/login" className="gradient-btn text-white px-6 py-2.5 rounded-md font-semibold hover:bg-blue-600 transition-colors inline-block">
-          Login
-        </Link>
+        {isAuthenticated ? (
+          <>
+            <span className="hidden sm:inline text-sm font-semibold text-[#4a5568]">Hi, {user.firstName}</span>
+            <Link to={getRoleHome(user)} className="rounded-md border border-medzo-blue px-5 py-2.5 font-semibold text-medzo-blue hover:bg-blue-50">Dashboard</Link>
+            <button type="button" onClick={logout} className="gradient-btn text-white px-6 py-2.5 rounded-md font-semibold hover:opacity-90 transition-opacity">
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/signup" className="gradient-btn text-white px-6 py-2.5 rounded-md font-semibold hover:opacity-90 transition-opacity inline-block">Sign Up</Link>
+            <Link to="/login" className="gradient-btn text-white px-6 py-2.5 rounded-md font-semibold hover:opacity-90 transition-opacity inline-block">Login</Link>
+          </>
+        )}
       </div>
     </header>
   );
