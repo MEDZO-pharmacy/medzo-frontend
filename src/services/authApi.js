@@ -124,6 +124,10 @@ export const approveStaffId = (approval) => authenticatedRequest('/users/staff-i
   body: JSON.stringify(approval),
 })
 export const getStaffInvitations = () => authenticatedRequest('/users/staff-invitations')
+export const updateManagedUser = (userId, user) => authenticatedRequest(`/users/${userId}/managed`, {
+  method: 'PUT',
+  body: JSON.stringify(user),
+})
 export const setUserStatus = (userId, isActive) => authenticatedRequest(`/users/${userId}/status`, {
   method: 'PATCH',
   body: JSON.stringify({ isActive }),

@@ -31,7 +31,7 @@ const Header = () => {
       <div className="flex items-center gap-4">
         {isAuthenticated ? (
           <>
-            <span className="hidden sm:inline text-sm font-semibold text-[#4a5568]">Hi, {user.firstName}</span>
+            <span className="hidden sm:inline text-sm font-semibold text-[#4a5568]">Welcome back! {user.username || user.firstName}</span>
             <Link to={getRoleHome(user)} className="rounded-md border border-medzo-blue px-5 py-2.5 font-semibold text-medzo-blue hover:bg-blue-50">Dashboard</Link>
             <button type="button" onClick={logout} className="gradient-btn text-white px-6 py-2.5 rounded-md font-semibold hover:opacity-90 transition-opacity">
               Logout

@@ -38,9 +38,7 @@ function App() {
               <Route path="/about" element={<AboutUs />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/read-more" element={<ReadMore />} />
-              <Route element={<ProtectedRoute />}>
-                <Route path="/products" element={<Products />} />
-              </Route>
+              <Route path="/products" element={<Products />} />
             </Route>
             <Route element={<ProtectedRoute roles={['Pharmacist']} />}>
               <Route path="/pharmacist" element={<PharmacistDashboard />} />
