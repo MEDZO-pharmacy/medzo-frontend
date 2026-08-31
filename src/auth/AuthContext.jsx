@@ -1,6 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
   ApiError,
+<<<<<<< Updated upstream
+=======
+  evaluateSession as evaluateSessionRequest,
+>>>>>>> Stashed changes
   login as loginRequest,
   refreshSession,
   register as registerRequest,
@@ -52,6 +56,13 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+<<<<<<< Updated upstream
+=======
+  const evaluateSession = useCallback(async () => {
+    await evaluateSessionRequest()
+  }, [])
+
+>>>>>>> Stashed changes
   const value = useMemo(() => ({
     session,
     user: session?.user || null,
@@ -60,7 +71,12 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+<<<<<<< Updated upstream
   }), [session, isLoading, login, register, logout])
+=======
+    evaluateSession,
+  }), [session, isLoading, login, register, logout, evaluateSession])
+>>>>>>> Stashed changes
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

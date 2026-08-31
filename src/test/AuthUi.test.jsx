@@ -60,6 +60,10 @@ describe('authentication UI', () => {
     const roleSession = { ...session, user: { ...session.user, roles: [role] } }
     vi.stubGlobal('fetch', vi.fn(async (url) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(roleSession)
+<<<<<<< Updated upstream
+=======
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
+>>>>>>> Stashed changes
       if (url.endsWith(`/dashboard/${path.slice(1)}`)) return jsonResponse({ modules: [] })
       throw new Error(`Unexpected request: ${url}`)
     }))
@@ -108,6 +112,10 @@ describe('authentication UI', () => {
         expect(JSON.parse(options.body)).toEqual({ identifier: 'A1001', password: 'Strong1!' })
         return jsonResponse(adminSession)
       }
+<<<<<<< Updated upstream
+=======
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
+>>>>>>> Stashed changes
       if (url.endsWith('/dashboard/admin')) return jsonResponse({ modules: [], users: [], totalUsers: 0 })
       if (url.endsWith('/users/staff-invitations')) return jsonResponse([])
       throw new Error(`Unexpected request: ${url}`)
@@ -136,6 +144,10 @@ describe('authentication UI', () => {
     let createdBody = null
     const fetchMock = vi.fn(async (url, options = {}) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(adminSession)
+<<<<<<< Updated upstream
+=======
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
+>>>>>>> Stashed changes
       if (url.endsWith('/dashboard/admin')) return jsonResponse({ modules: [], users: [], totalUsers: 0 })
       if (url.endsWith('/users/staff-invitations')) return jsonResponse([])
       if (url.endsWith('/users') && options.method === 'POST') {
@@ -174,6 +186,10 @@ describe('authentication UI', () => {
     }
     const fetchMock = vi.fn(async (url) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(adminSession)
+<<<<<<< Updated upstream
+=======
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
+>>>>>>> Stashed changes
       if (url.endsWith('/dashboard/admin')) {
         return jsonResponse({ modules: [], users: [managedUser], totalUsers: 1 })
       }
@@ -202,6 +218,10 @@ describe('authentication UI', () => {
     let invitations = []
     const fetchMock = vi.fn(async (url, options = {}) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(adminSession)
+<<<<<<< Updated upstream
+=======
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
+>>>>>>> Stashed changes
       if (url.endsWith('/dashboard/admin')) {
         return jsonResponse({ modules: [], users: [managedUser], totalUsers: 1 })
       }
@@ -255,4 +275,39 @@ describe('authentication UI', () => {
     const statusRequest = fetchMock.mock.calls.find(([url]) => url.endsWith('/users/managed-user/status'))
     expect(JSON.parse(statusRequest[1].body)).toEqual({ isActive: false })
   })
+<<<<<<< Updated upstream
+=======
+
+  it('applies a changed role when the next protected route is evaluated', async () => {
+    const inventorySession = {
+      ...session,
+      token: 'inventory-access-token',
+      user: { ...session.user, staffId: 'I1001', roles: ['InventoryManager'] },
+    }
+    let refreshCount = 0
+    let sessionCheckCount = 0
+    const fetchMock = vi.fn(async (url) => {
+      if (url.endsWith('/auth/refresh')) {
+        refreshCount += 1
+        return jsonResponse(refreshCount === 1 ? session : inventorySession)
+      }
+      if (url.endsWith('/auth/session')) {
+        sessionCheckCount += 1
+        return sessionCheckCount === 1
+          ? jsonResponse({ message: 'Account permissions changed.' }, 401)
+          : new Response(null, { status: 204 })
+      }
+      throw new Error(`Unexpected request: ${url}`)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    window.history.replaceState({}, '', '/pharmacist')
+
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Inventory Manager Dashboard' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/inventory')
+    expect(screen.queryByRole('heading', { name: 'Pharmacist Dashboard' })).not.toBeInTheDocument()
+    expect(fetchMock.mock.calls.filter(([url]) => url.endsWith('/auth/refresh'))).toHaveLength(2)
+  })
+>>>>>>> Stashed changes
 })

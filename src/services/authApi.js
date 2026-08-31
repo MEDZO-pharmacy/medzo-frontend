@@ -33,8 +33,16 @@ const request = async (path, options = {}) => {
   const contentType = response.headers.get('content-type') || ''
   const data = contentType.includes('application/json') ? await response.json() : null
   if (!response.ok) {
+<<<<<<< Updated upstream
     throw new ApiError(
       data?.message || data?.title || 'The request could not be completed.',
+=======
+    const fallbackMessage = response.status >= 500
+      ? 'The authentication service is temporarily unavailable. Make sure the API is running and try again.'
+      : 'The request could not be completed.'
+    throw new ApiError(
+      data?.message || data?.detail || data?.title || fallbackMessage,
+>>>>>>> Stashed changes
       response.status,
       data?.errors || {},
       data || {},
@@ -104,6 +112,11 @@ export const authenticatedRequest = async (path, options = {}) => {
   }
 }
 
+<<<<<<< Updated upstream
+=======
+export const evaluateSession = () => authenticatedRequest('/auth/session')
+
+>>>>>>> Stashed changes
 export const getReviews = () => request('/reviews')
 export const createReview = (review) => request('/reviews', {
   method: 'POST',
