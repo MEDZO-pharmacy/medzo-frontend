@@ -4,6 +4,7 @@ import { ArrowLeft, User, Lock, Eye, EyeOff } from 'lucide-react'
 import { ApiError } from '../services/authApi'
 import { useAuth } from '../auth/AuthContext'
 import { getRoleHome } from '../auth/roleRouting'
+import { consumeLogoutReason, INACTIVITY_TIMEOUT_MS } from '../auth/inactivitySession'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -14,6 +15,7 @@ const Login = () => {
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [logoutReason] = useState(() => consumeLogoutReason())
 
   const handleChange = ({ target: { name, value } }) => {
     setFormData((current) => ({ ...current, [name]: value }))
@@ -72,6 +74,12 @@ const Login = () => {
               <h1 className="text-3xl font-bold text-[#0a192f] mb-2">Welcome</h1>
               <p className="text-[#6b7280]">Please sign in to access your Medzo account.</p>
             </div>
+
+            {logoutReason === 'inactivity' && (
+              <div role="status" className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                You were signed out after {INACTIVITY_TIMEOUT_MS / 60_000} minutes of inactivity.
+              </div>
+            )}
 
             {submitError && <div role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</div>}
 

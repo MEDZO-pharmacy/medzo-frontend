@@ -11,14 +11,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-<<<<<<< Updated upstream
-        target: 'https://localhost:7080',
-        changeOrigin: true,
-        secure: false,
-=======
         target: 'http://localhost:5080',
         changeOrigin: true,
->>>>>>> Stashed changes
       },
     },
   },
