@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
+import { ACTIVITY_STORAGE_KEY, INACTIVITY_TIMEOUT_MS } from '../auth/inactivitySession'
 
 const session = {
   token: 'access-token',
@@ -25,6 +26,8 @@ const jsonResponse = (body, status = 200) => new Response(JSON.stringify(body), 
 afterEach(() => {
   cleanup()
   vi.unstubAllGlobals()
+  vi.useRealTimers()
+  localStorage.clear()
   window.history.replaceState({}, '', '/')
 })
 
@@ -60,6 +63,7 @@ describe('authentication UI', () => {
     const roleSession = { ...session, user: { ...session.user, roles: [role] } }
     vi.stubGlobal('fetch', vi.fn(async (url) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(roleSession)
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
       if (url.endsWith(`/dashboard/${path.slice(1)}`)) return jsonResponse({ modules: [] })
       throw new Error(`Unexpected request: ${url}`)
     }))
@@ -96,6 +100,47 @@ describe('authentication UI', () => {
     expect(localStorage.getItem('medzo.auth')).toBeNull()
   })
 
+  it('revokes the session and returns to login after inactivity', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.fn(async (url) => {
+      if (url.endsWith('/auth/refresh')) return jsonResponse(session)
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
+      if (url.endsWith('/auth/revoke')) return new Response(null, { status: 204 })
+      throw new Error(`Unexpected request: ${url}`)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    window.history.replaceState({}, '', '/pharmacist')
+
+    render(<App />)
+    await act(async () => { await Promise.resolve(); await Promise.resolve() })
+    expect(screen.getByRole('heading', { name: 'Pharmacist Dashboard' })).toBeInTheDocument()
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(INACTIVITY_TIMEOUT_MS) })
+
+    expect(screen.getByRole('heading', { name: 'Welcome' })).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('signed out after 15 minutes of inactivity')
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/revoke'),
+      expect.objectContaining({ method: 'POST', credentials: 'include' }),
+    )
+  })
+
+  it('does not restore a session that expired while the app was closed', async () => {
+    localStorage.setItem(ACTIVITY_STORAGE_KEY, String(Date.now() - INACTIVITY_TIMEOUT_MS - 1))
+    const fetchMock = vi.fn(async (url) => {
+      if (url.endsWith('/auth/revoke')) return new Response(null, { status: 204 })
+      throw new Error(`Unexpected request: ${url}`)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    window.history.replaceState({}, '', '/pharmacist')
+
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Welcome' })).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('signed out after 15 minutes of inactivity')
+    expect(fetchMock.mock.calls.some(([url]) => url.endsWith('/auth/refresh'))).toBe(false)
+  })
+
   it('opens Login from the homepage and redirects an Admin to the dashboard', async () => {
     const adminSession = {
       ...session,
@@ -108,6 +153,7 @@ describe('authentication UI', () => {
         expect(JSON.parse(options.body)).toEqual({ identifier: 'A1001', password: 'Strong1!' })
         return jsonResponse(adminSession)
       }
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
       if (url.endsWith('/dashboard/admin')) return jsonResponse({ modules: [], users: [], totalUsers: 0 })
       if (url.endsWith('/users/staff-invitations')) return jsonResponse([])
       throw new Error(`Unexpected request: ${url}`)
@@ -136,6 +182,7 @@ describe('authentication UI', () => {
     let createdBody = null
     const fetchMock = vi.fn(async (url, options = {}) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(adminSession)
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
       if (url.endsWith('/dashboard/admin')) return jsonResponse({ modules: [], users: [], totalUsers: 0 })
       if (url.endsWith('/users/staff-invitations')) return jsonResponse([])
       if (url.endsWith('/users') && options.method === 'POST') {
@@ -174,6 +221,7 @@ describe('authentication UI', () => {
     }
     const fetchMock = vi.fn(async (url) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(adminSession)
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
       if (url.endsWith('/dashboard/admin')) {
         return jsonResponse({ modules: [], users: [managedUser], totalUsers: 1 })
       }
@@ -202,6 +250,7 @@ describe('authentication UI', () => {
     let invitations = []
     const fetchMock = vi.fn(async (url, options = {}) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(adminSession)
+      if (url.endsWith('/auth/session')) return new Response(null, { status: 204 })
       if (url.endsWith('/dashboard/admin')) {
         return jsonResponse({ modules: [], users: [managedUser], totalUsers: 1 })
       }
@@ -254,5 +303,37 @@ describe('authentication UI', () => {
     expect(screen.getByText('Claimed')).toBeInTheDocument()
     const statusRequest = fetchMock.mock.calls.find(([url]) => url.endsWith('/users/managed-user/status'))
     expect(JSON.parse(statusRequest[1].body)).toEqual({ isActive: false })
+  })
+
+  it('applies a changed role when the next protected route is evaluated', async () => {
+    const inventorySession = {
+      ...session,
+      token: 'inventory-access-token',
+      user: { ...session.user, staffId: 'I1001', roles: ['InventoryManager'] },
+    }
+    let refreshCount = 0
+    let sessionCheckCount = 0
+    const fetchMock = vi.fn(async (url) => {
+      if (url.endsWith('/auth/refresh')) {
+        refreshCount += 1
+        return jsonResponse(refreshCount === 1 ? session : inventorySession)
+      }
+      if (url.endsWith('/auth/session')) {
+        sessionCheckCount += 1
+        return sessionCheckCount === 1
+          ? jsonResponse({ message: 'Account permissions changed.' }, 401)
+          : new Response(null, { status: 204 })
+      }
+      throw new Error(`Unexpected request: ${url}`)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    window.history.replaceState({}, '', '/pharmacist')
+
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Inventory Manager Dashboard' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/inventory')
+    expect(screen.queryByRole('heading', { name: 'Pharmacist Dashboard' })).not.toBeInTheDocument()
+    expect(fetchMock.mock.calls.filter(([url]) => url.endsWith('/auth/refresh'))).toHaveLength(2)
   })
 })
