@@ -49,7 +49,7 @@ describe('authentication UI', () => {
 
     render(<App />)
 
-    expect(await screen.findByRole('heading', { name: 'Products Page' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Medicine information and stock visibility/i })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/products')
   })
 
