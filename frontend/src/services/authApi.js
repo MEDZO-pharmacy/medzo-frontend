@@ -132,6 +132,18 @@ export const authenticatedServiceRequest = async (baseUrl, path, options = {}) =
   }
 }
 
+export const publicServiceRequest = async (baseUrl, path, options = {}) => {
+  let response
+  try {
+    response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, options)
+  } catch {
+    throw new ApiError('The medicine catalogue is temporarily unavailable. Please try again.')
+  }
+  const data = await response.json().catch(() => null)
+  if (!response.ok) throw new ApiError(data?.detail || data?.title || 'The medicine catalogue could not be loaded.', response.status, data?.errors || {}, data || {})
+  return data
+}
+
 export const getReviews = () => request('/reviews')
 export const createReview = (review) => request('/reviews', {
   method: 'POST',

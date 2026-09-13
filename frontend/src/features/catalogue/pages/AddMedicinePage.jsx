@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import PageBackLink from '../../../components/PageBackLink'
 import MedicineForm from '../components/MedicineForm'
 import { createMedicine } from '../api/catalogueApi'
 
@@ -40,7 +41,7 @@ export default function AddMedicinePage() {
   return (
     <main className="min-h-screen bg-medzo-light-bg px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
-        <Link to="/catalogue" className="mb-4 inline-block font-semibold text-medzo-blue">Back to catalogue</Link>
+        <PageBackLink fallback="/catalogue">Back to catalogue</PageBackLink>
         <h1 className="text-2xl font-bold text-[#0a192f] sm:text-3xl">Add medicine</h1>
         <p className="mb-6 mt-2 text-medzo-text-light">Enter the catalogue details. Stock can be received after the medicine is created.</p>
 

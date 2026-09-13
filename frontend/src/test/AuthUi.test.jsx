@@ -30,9 +30,9 @@ afterEach(() => {
 
 describe('authentication UI', () => {
   it('redirects a signed-out user away from a protected route', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
-      jsonResponse({ message: 'Authentication session is unavailable.' }, 401),
-    ))
+    vi.stubGlobal('fetch', vi.fn(async (url) => url.includes('/api/catalogue/medicines/public')
+      ? jsonResponse({ items: [], page: 1, pageSize: 12, totalCount: 0 })
+      : jsonResponse({ message: 'Authentication session is unavailable.' }, 401)))
     window.history.replaceState({}, '', '/pharmacist')
 
     render(<App />)
@@ -49,7 +49,7 @@ describe('authentication UI', () => {
 
     render(<App />)
 
-    expect(await screen.findByRole('heading', { name: /Medicine information and stock visibility/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Find medicines currently available at Medzo/i })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/products')
   })
 

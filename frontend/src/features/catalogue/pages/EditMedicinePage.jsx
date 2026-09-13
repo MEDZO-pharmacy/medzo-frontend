@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import PageBackLink from '../../../components/PageBackLink'
 import MedicineForm from '../components/MedicineForm'
 import { getMedicine, updateMedicine } from '../api/catalogueApi'
 
@@ -55,7 +56,7 @@ export default function EditMedicinePage() {
   return (
     <main className="min-h-screen bg-medzo-light-bg px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
-        <Link to="/catalogue" className="mb-4 inline-block font-semibold text-medzo-blue">Back to catalogue</Link>
+        <PageBackLink fallback="/catalogue">Back to catalogue</PageBackLink>
         <h1 className="text-2xl font-bold text-[#0a192f] sm:text-3xl">Edit medicine</h1>
         <p className="mb-6 mt-2 text-medzo-text-light">Update the catalogue details. Existing stock batches and movement history will not be changed.</p>
 
