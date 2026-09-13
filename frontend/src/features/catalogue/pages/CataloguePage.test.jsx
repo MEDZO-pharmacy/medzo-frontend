@@ -3,17 +3,18 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import CataloguePage from './CataloguePage'
-import { searchMedicines } from '../api/catalogueApi'
+import { deleteMedicine, searchMedicines } from '../api/catalogueApi'
 
-vi.mock('../api/catalogueApi', () => ({ searchMedicines: vi.fn() }))
+const authState = vi.hoisted(() => ({ roles: ['Pharmacist'] }))
+vi.mock('../api/catalogueApi', () => ({ searchMedicines: vi.fn(), deleteMedicine: vi.fn() }))
 vi.mock('../../../auth/AuthContext', () => ({
-  useAuth: () => ({ user: { roles: ['Pharmacist'] } }),
+  useAuth: () => ({ user: { roles: authState.roles } }),
 }))
 
 const fullCatalogue = {
   items: [{
     id: '1', name: 'Paracetamol', genericName: 'Acetaminophen', manufacturer: 'Medzo Labs',
-    dosageForm: 'Tablet', unitPrice: 12.5, quantityOnHand: 25, isLowStock: false,
+    dosageForm: 'Tablet', unitPrice: 12.5, quantityOnHand: 25, isLowStock: false, version: 3,
   }],
   totalCount: 1,
 }
@@ -24,8 +25,11 @@ afterEach(cleanup)
 
 describe('CataloguePage search', () => {
   beforeEach(() => {
+    authState.roles = ['Pharmacist']
     searchMedicines.mockReset()
     searchMedicines.mockResolvedValue(fullCatalogue)
+    deleteMedicine.mockReset()
+    deleteMedicine.mockResolvedValue(null)
   })
 
   it('searches for medicines by the submitted term', async () => {
@@ -67,5 +71,19 @@ describe('CataloguePage search', () => {
     await waitFor(() => expect(searchMedicines).toHaveBeenLastCalledWith({ search: '' }))
     expect(screen.getByRole('searchbox')).toHaveValue('')
     expect(await screen.findByText('Paracetamol')).toBeInTheDocument()
+  })
+
+  it('lets an Inventory Manager confirm and delete a medicine', async () => {
+    authState.roles = ['InventoryManager']
+    const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    searchMedicines.mockResolvedValueOnce(fullCatalogue).mockResolvedValueOnce({ items: [], totalCount: 0 })
+    renderPage()
+
+    await screen.findByText('Paracetamol')
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+
+    await waitFor(() => expect(deleteMedicine).toHaveBeenCalledWith('1', 3))
+    expect(await screen.findByText('Paracetamol was removed from the active catalogue.')).toBeInTheDocument()
   })
 })

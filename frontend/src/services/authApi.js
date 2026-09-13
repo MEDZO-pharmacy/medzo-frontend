@@ -117,7 +117,12 @@ export const authenticatedServiceRequest = async (baseUrl, path, options = {}) =
       throw new ApiError('Cannot connect to the Catalogue and Inventory service. Confirm that the API is running, then try again.')
     }
     const data = response.status === 204 ? null : await response.json().catch(() => null)
-    if (!response.ok) throw new ApiError(data?.detail || data?.title || 'The request could not be completed.', response.status, data?.errors || {}, data || {})
+    if (!response.ok) {
+      const fallback = response.status >= 500
+        ? `Catalogue and Inventory API is unavailable (HTTP ${response.status}). Confirm the API is running on port 5000.`
+        : `The request could not be completed (HTTP ${response.status}).`
+      throw new ApiError(data?.detail || data?.title || fallback, response.status, data?.errors || {}, data || {})
+    }
     return data
   }
   try { return await send() } catch (error) {

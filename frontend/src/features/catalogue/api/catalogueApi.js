@@ -4,3 +4,4 @@ export const searchMedicines = ({ search = '', page = 1, pageSize = 20 } = {}) =
 export const getMedicine = (id) => authenticatedServiceRequest(base, `/api/catalogue/medicines/${id}`)
 export const createMedicine = (data) => authenticatedServiceRequest(base, '/api/catalogue/medicines', { method: 'POST', body: JSON.stringify(data) })
 export const updateMedicine = (id, data, version) => authenticatedServiceRequest(base, `/api/catalogue/medicines/${id}`, { method: 'PUT', headers: { 'If-Match': String(version) }, body: JSON.stringify(data) })
+export const deleteMedicine = (id, version) => authenticatedServiceRequest(base, `/api/catalogue/medicines/${id}`, { method: 'DELETE', headers: { 'If-Match': String(version) } })

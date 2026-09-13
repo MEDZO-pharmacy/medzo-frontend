@@ -6,6 +6,7 @@ import { searchMedicines } from '../features/catalogue/api/catalogueApi'
 import MedicineTable from '../features/catalogue/components/MedicineTable'
 import { getInventory } from '../features/inventory/api/inventoryApi'
 import StockLevelCard from '../features/inventory/components/StockLevelCard'
+import DashboardLogoutButton from '../components/DashboardLogoutButton'
 
 export default function PharmacistDashboard() {
   const { user } = useAuth()
@@ -73,10 +74,11 @@ export default function PharmacistDashboard() {
             <p className="mt-2 text-medzo-text-light">Search medicines and check current availability during a sale.</p>
             <p className="mt-2 text-sm font-semibold text-medzo-blue"><span>Signed in as</span> <span>{user?.firstName || user?.username} · {user?.staffId}</span></p>
           </div>
-          <nav className="grid gap-3 sm:grid-cols-3" aria-label="Pharmacist quick actions">
+          <nav className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Pharmacist quick actions">
             <Link to="/catalogue" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Full catalogue</Link>
             <Link to="/inventory" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">View inventory</Link>
             <Link to="/inventory/sale-issues" className="gradient-btn rounded-lg px-5 py-3 text-center font-semibold text-white">Sale updates</Link>
+            <DashboardLogoutButton />
           </nav>
         </div>
 

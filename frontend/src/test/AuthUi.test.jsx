@@ -70,6 +70,7 @@ describe('authentication UI', () => {
     expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/')
     expect(screen.getByText('Signed in as')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Available modules' })).not.toBeInTheDocument()
   })
 

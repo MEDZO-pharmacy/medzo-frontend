@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../../auth/AuthContext'
 import MedicineSearch from '../components/MedicineSearch'
 import MedicineTable from '../components/MedicineTable'
-import { searchMedicines } from '../api/catalogueApi'
+import { deleteMedicine, searchMedicines } from '../api/catalogueApi'
 
 export default function CataloguePage() {
   const { user } = useAuth()
@@ -12,6 +12,8 @@ export default function CataloguePage() {
   const [data, setData] = useState({ items: [], totalCount: 0 })
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [deletingId, setDeletingId] = useState(null)
 
   const load = useCallback(async (search = '') => {
     const normalizedSearch = search.trim()
@@ -56,6 +58,22 @@ export default function CataloguePage() {
 
   const canManage = user?.roles?.some((role) => ['Admin', 'InventoryManager'].includes(role))
 
+  const remove = async (medicine) => {
+    if (!window.confirm(`Delete ${medicine.name}? Its stock and audit history will be preserved.`)) return
+    setDeletingId(medicine.id)
+    setError('')
+    setNotice('')
+    try {
+      await deleteMedicine(medicine.id, medicine.version)
+      setNotice(`${medicine.name} was removed from the active catalogue.`)
+      await load(appliedQuery)
+    } catch (requestError) {
+      setError(requestError.status === 409 ? 'This medicine changed before deletion. Reload the catalogue and try again.' : requestError.message || 'The medicine could not be deleted.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <main className="min-h-screen bg-medzo-light-bg px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-7xl">
@@ -68,6 +86,7 @@ export default function CataloguePage() {
         </div>
 
         <MedicineSearch value={query} onChange={setQuery} onSubmit={handleSubmit} onClear={handleClear} busy={status === 'loading'} />
+        {notice && <p role="status" className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">{notice}</p>}
 
         <section className="mt-6" aria-live="polite" aria-busy={status === 'loading'}>
           {status === 'loading' && <p className="rounded-2xl bg-white p-8 text-center text-medzo-text-light shadow-sm">Loading medicines…</p>}
@@ -84,7 +103,7 @@ export default function CataloguePage() {
               <p className="mb-3 text-sm text-medzo-text-light">
                 {data.totalCount} {data.totalCount === 1 ? 'medicine' : 'medicines'} found{appliedQuery ? ` for “${appliedQuery}”` : ''}.
               </p>
-              <MedicineTable medicines={data.items} canManage={canManage} />
+              <MedicineTable medicines={data.items} canManage={canManage} onDelete={remove} deletingId={deletingId} />
             </>
           )}
 
