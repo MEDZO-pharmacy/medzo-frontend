@@ -12,8 +12,15 @@ import SignUp from './pages/SignUp'
 import { AuthProvider } from './auth/AuthContext'
 import ProtectedRoute from './auth/ProtectedRoute'
 import PharmacistDashboard from './pages/PharmacistDashboard'
-import InventoryDashboard from './pages/InventoryDashboard'
 import AdminDashboard from './pages/AdminDashboard'
+import CataloguePage from './features/catalogue/pages/CataloguePage'
+import AddMedicinePage from './features/catalogue/pages/AddMedicinePage'
+import EditMedicinePage from './features/catalogue/pages/EditMedicinePage'
+import InventoryDashboardPage from './features/inventory/pages/InventoryDashboardPage'
+import RecordBatchPage from './features/inventory/pages/RecordBatchPage'
+import LowStockPage from './features/inventory/pages/LowStockPage'
+import PurchaseReceiptsPage from './features/inventory/pages/PurchaseReceiptsPage'
+import SaleIssuesPage from './features/inventory/pages/SaleIssuesPage'
 import './index.css'
 
 const MainLayout = () => {
@@ -43,8 +50,17 @@ function App() {
             <Route element={<ProtectedRoute roles={['Pharmacist']} />}>
               <Route path="/pharmacist" element={<PharmacistDashboard />} />
             </Route>
-            <Route element={<ProtectedRoute roles={['InventoryManager']} />}>
-              <Route path="/inventory" element={<InventoryDashboard />} />
+            <Route element={<ProtectedRoute roles={['Pharmacist', 'InventoryManager', 'Admin']} />}>
+              <Route path="/catalogue" element={<CataloguePage />} />
+              <Route path="/inventory" element={<InventoryDashboardPage />} />
+              <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
+            </Route>
+            <Route element={<ProtectedRoute roles={['InventoryManager', 'Admin']} />}>
+              <Route path="/catalogue/new" element={<AddMedicinePage />} />
+              <Route path="/catalogue/:medicineId/edit" element={<EditMedicinePage />} />
+              <Route path="/inventory/batches/new" element={<RecordBatchPage />} />
+              <Route path="/inventory/low-stock" element={<LowStockPage />} />
+              <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
             </Route>
             <Route element={<ProtectedRoute roles={['Admin']} />}>
               <Route path="/admin" element={<AdminDashboard />} />

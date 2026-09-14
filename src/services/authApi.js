@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
+const API_BASE_URL = (import.meta.env.VITE_AUTH_API_URL || import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
 
 let accessToken = null
 let accessTokenExpiresAt = null
@@ -33,11 +33,8 @@ const request = async (path, options = {}) => {
   const contentType = response.headers.get('content-type') || ''
   const data = contentType.includes('application/json') ? await response.json() : null
   if (!response.ok) {
-    const fallbackMessage = response.status >= 500
-      ? 'The authentication service is temporarily unavailable. Make sure the API is running and try again.'
-      : 'The request could not be completed.'
     throw new ApiError(
-      data?.message || data?.detail || data?.title || fallbackMessage,
+      data?.message || data?.title || 'The request could not be completed.',
       response.status,
       data?.errors || {},
       data || {},
@@ -56,8 +53,6 @@ const rememberSession = (session) => {
 export const setSessionListener = (listener) => {
   sessionListener = listener || (() => {})
 }
-
-export const forgetSession = () => rememberSession(null)
 
 export const login = async (credentials) => rememberSession(await request('/auth/login', {
   method: 'POST',
@@ -109,7 +104,45 @@ export const authenticatedRequest = async (path, options = {}) => {
   }
 }
 
-export const evaluateSession = () => authenticatedRequest('/auth/session')
+export const authenticatedServiceRequest = async (baseUrl, path, options = {}) => {
+  if (!accessToken || (accessTokenExpiresAt && accessTokenExpiresAt <= Date.now() + 30_000)) await refreshSession()
+  const send = async () => {
+    let response
+    try {
+      response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
+        ...options,
+        headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers, Authorization: `Bearer ${accessToken}` },
+      })
+    } catch {
+      throw new ApiError('Cannot connect to the Catalogue and Inventory service. Confirm that the API is running, then try again.')
+    }
+    const data = response.status === 204 ? null : await response.json().catch(() => null)
+    if (!response.ok) {
+      const fallback = response.status >= 500
+        ? `Catalogue and Inventory API is unavailable (HTTP ${response.status}). Confirm the API is running on port 5000.`
+        : `The request could not be completed (HTTP ${response.status}).`
+      throw new ApiError(data?.detail || data?.title || fallback, response.status, data?.errors || {}, data || {})
+    }
+    return data
+  }
+  try { return await send() } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 401) throw error
+    await refreshSession()
+    return send()
+  }
+}
+
+export const publicServiceRequest = async (baseUrl, path, options = {}) => {
+  let response
+  try {
+    response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, options)
+  } catch {
+    throw new ApiError('The medicine catalogue is temporarily unavailable. Please try again.')
+  }
+  const data = await response.json().catch(() => null)
+  if (!response.ok) throw new ApiError(data?.detail || data?.title || 'The medicine catalogue could not be loaded.', response.status, data?.errors || {}, data || {})
+  return data
+}
 
 export const getReviews = () => request('/reviews')
 export const createReview = (review) => request('/reviews', {
