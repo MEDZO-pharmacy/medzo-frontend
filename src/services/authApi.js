@@ -141,6 +141,7 @@ export const publicServiceRequest = async (baseUrl, path, options = {}) => {
   }
   const data = await response.json().catch(() => null)
   if (!response.ok) throw new ApiError(data?.detail || data?.title || 'The medicine catalogue could not be loaded.', response.status, data?.errors || {}, data || {})
+  if (!data) throw new ApiError('The medicine catalogue returned an invalid response. Please try again.')
   return data
 }
 

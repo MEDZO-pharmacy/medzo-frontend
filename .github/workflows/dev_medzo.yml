@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_CATALOGUE_INVENTORY_API_URL: https://medzocatalogue-drdwe4bzcscja0c4.centralindia-01.azurewebsites.net
     permissions:
       contents: read #This is required for actions/checkout
 
