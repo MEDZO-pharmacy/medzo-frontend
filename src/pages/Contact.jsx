@@ -53,7 +53,7 @@ const Contact = () => {
           </div>
           <label className="block text-sm font-semibold">Subject<input required name="subject" value={form.subject} onChange={change} className="mt-2 w-full rounded-lg border border-gray-200 p-3" /></label>
           <label className="block text-sm font-semibold">Message<textarea required minLength={10} rows={6} name="message" value={form.message} onChange={change} className="mt-2 w-full resize-none rounded-lg border border-gray-200 p-3" /></label>
-          <button disabled={isSubmitting} className="gradient-btn rounded-lg px-7 py-3 font-bold text-white disabled:opacity-60">{isSubmitting ? 'Sending…' : 'Send Message'}</button>
+          <button type="submit" disabled={isSubmitting} className="gradient-btn rounded-lg px-7 py-3 font-bold text-white disabled:opacity-60">{isSubmitting ? 'Sending…' : 'Send Message'}</button>
         </form>
       </div>
     </main>

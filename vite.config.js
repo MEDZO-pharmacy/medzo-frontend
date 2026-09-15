@@ -11,8 +11,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5080',
+        target: 'https://localhost:7080',
         changeOrigin: true,
+        secure: false,
+      },
+      '/catalogue-inventory-api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/catalogue-inventory-api/, ''),
       },
     },
   },

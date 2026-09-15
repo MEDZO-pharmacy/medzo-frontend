@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Legacy nested application path. The deployable application lives at repository root.
+frontend/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
