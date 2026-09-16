@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MedicineForm from '../components/MedicineForm'
 import { createMedicine } from '../api/catalogueApi'
@@ -8,6 +8,7 @@ export default function AddMedicinePage() {
   const [error, setError] = useState('')
   const [duplicate, setDuplicate] = useState(null)
   const [created, setCreated] = useState(null)
+  const nameInputRef = useRef(null)
 
   const save = async (values, allowDuplicate = false) => {
     setBusy(true)
@@ -22,6 +23,14 @@ export default function AddMedicinePage() {
     } finally {
       setBusy(false)
     }
+  }
+
+  const reviewForm = () => {
+    setDuplicate(null)
+    requestAnimationFrame(() => {
+      nameInputRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+      nameInputRef.current?.focus({ preventScroll: true })
+    })
   }
 
   if (created) return (
@@ -51,12 +60,12 @@ export default function AddMedicinePage() {
             <p className="mt-1">A medicine with the same name and manufacturer already exists. Review the details before saving another record.</p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <button type="button" onClick={() => save(duplicate, true)} disabled={busy} className="rounded-lg bg-amber-700 px-5 py-2.5 font-semibold text-white disabled:opacity-60">{busy ? 'Saving...' : 'Save duplicate anyway'}</button>
-              <button type="button" onClick={() => setDuplicate(null)} disabled={busy} className="rounded-lg border border-amber-400 px-5 py-2.5 font-semibold">Review form</button>
+              <button type="button" onClick={reviewForm} disabled={busy} className="rounded-lg border border-amber-400 px-5 py-2.5 font-semibold">Review form</button>
             </div>
           </div>
         )}
 
-        <MedicineForm onSubmit={save} busy={busy} />
+        <MedicineForm onSubmit={save} onChange={() => setDuplicate(null)} busy={busy} nameInputRef={nameInputRef} />
       </div>
     </main>
   )
