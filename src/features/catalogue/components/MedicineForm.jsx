@@ -10,7 +10,7 @@ const fields = [
   { name: 'reorderThreshold', label: 'Reorder threshold', type: 'number', min: 0, step: '1', inputMode: 'numeric' },
 ]
 
-export default function MedicineForm({ initial = {}, onSubmit, busy = false }) {
+export default function MedicineForm({ initial = {}, onSubmit, onChange, busy = false, nameInputRef }) {
   const [values, setValues] = useState({
     name: '', genericName: '', manufacturer: '', unitPrice: '', dosageForm: 'Tablet', reorderThreshold: 0, ...initial,
   })
@@ -20,6 +20,7 @@ export default function MedicineForm({ initial = {}, onSubmit, busy = false }) {
     const { name, value } = event.target
     setValues((current) => ({ ...current, [name]: value }))
     setErrors((current) => ({ ...current, [name]: undefined }))
+    onChange?.()
   }
 
   const submit = (event) => {
@@ -47,6 +48,7 @@ export default function MedicineForm({ initial = {}, onSubmit, busy = false }) {
               {label} <span className="text-red-600" aria-hidden="true">*</span>
               <input
                 {...inputProps}
+                ref={field.name === 'name' ? nameInputRef : undefined}
                 value={values[field.name]}
                 onChange={change}
                 disabled={busy}

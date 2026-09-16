@@ -48,6 +48,32 @@ describe('AddMedicinePage', () => {
     expect(await screen.findByRole('heading', { name: 'Medicine added successfully' })).toBeInTheDocument()
   })
 
+  it('returns focus to the form when reviewing a potential duplicate', async () => {
+    const user = userEvent.setup()
+    createMedicine.mockRejectedValueOnce({ status: 409, message: 'Potential duplicate' })
+    render(<MemoryRouter><AddMedicinePage /></MemoryRouter>)
+    await completeForm(user)
+
+    await user.click(screen.getByRole('button', { name: 'Save medicine' }))
+    await user.click(await screen.findByRole('button', { name: 'Review form' }))
+
+    await waitFor(() => expect(screen.getByLabelText('Medicine name')).toHaveFocus())
+    expect(screen.queryByRole('heading', { name: 'Potential duplicate medicine' })).not.toBeInTheDocument()
+  })
+
+  it('clears stale duplicate confirmation when the form is changed', async () => {
+    const user = userEvent.setup()
+    createMedicine.mockRejectedValueOnce({ status: 409, message: 'Potential duplicate' })
+    render(<MemoryRouter><AddMedicinePage /></MemoryRouter>)
+    await completeForm(user)
+
+    await user.click(screen.getByRole('button', { name: 'Save medicine' }))
+    expect(await screen.findByRole('heading', { name: 'Potential duplicate medicine' })).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Medicine name'), ' XR')
+
+    expect(screen.queryByRole('button', { name: 'Save duplicate anyway' })).not.toBeInTheDocument()
+  })
+
   it('confirms a successful complete save', async () => {
     const user = userEvent.setup()
     createMedicine.mockResolvedValue({ id: '1', name: 'Paracetamol' })
