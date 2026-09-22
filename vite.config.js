@@ -20,6 +20,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/catalogue-inventory-api/, ''),
       },
+      '/sales-api': {
+        target: 'http://localhost:5227',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/sales-api/, ''),
+      },
     },
   },
   test: {

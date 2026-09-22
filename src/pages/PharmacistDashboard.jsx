@@ -6,6 +6,7 @@ import { searchMedicines } from '../features/catalogue/api/catalogueApi'
 import MedicineTable from '../features/catalogue/components/MedicineTable'
 import { getInventory } from '../features/inventory/api/inventoryApi'
 import StockLevelCard from '../features/inventory/components/StockLevelCard'
+import SaleWorkspace from '../features/sales/components/SaleWorkspace'
 import DashboardLogoutButton from '../components/DashboardLogoutButton'
 
 export default function PharmacistDashboard() {
@@ -87,6 +88,8 @@ export default function PharmacistDashboard() {
           <StockLevelCard label="Units available" value={totalUnits} tone="green" />
           <StockLevelCard label="Low-stock medicines" value={lowStock} tone="red" />
         </section>
+
+        <SaleWorkspace medicines={medicines.items} inventory={inventory.items} onCompleted={() => load(query)} />
 
         <section className="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
