@@ -77,7 +77,7 @@ const Login = () => {
 
             <form className="space-y-6" onSubmit={handleSubmit} noValidate>
               <div className="space-y-2">
-                <label htmlFor="login-identifier" className="block text-sm font-bold text-[#0a192f]">Staff ID, Username, or Email</label>
+                <label htmlFor="login-identifier" className="block text-sm font-bold text-[#0a192f]">Staff ID, Username, or Email <span className="text-red-600" aria-hidden="true">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><User size={20} className="text-[#a0aec0]" /></span>
                   <input id="login-identifier" type="text" name="identifier" value={formData.identifier} onChange={handleChange} autoComplete="username" aria-invalid={Boolean(errors.identifier)} placeholder="Staff ID, username, or email" className="w-full pl-12 pr-4 py-3.5 bg-[#f8fafc] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-medzo-blue focus:border-transparent transition-all placeholder:text-[#a0aec0]" />
@@ -86,7 +86,7 @@ const Login = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="login-password" className="block text-sm font-bold text-[#0a192f]">Password</label>
+                <label htmlFor="login-password" className="block text-sm font-bold text-[#0a192f]">Password <span className="text-red-600" aria-hidden="true">*</span></label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Lock size={20} className="text-[#a0aec0]" /></span>
                   <input id="login-password" type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} autoComplete="current-password" aria-invalid={Boolean(errors.password)} placeholder="Enter your password" className="w-full pl-12 pr-12 py-3.5 bg-[#f8fafc] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-medzo-blue focus:border-transparent transition-all placeholder:text-[#a0aec0]" />
