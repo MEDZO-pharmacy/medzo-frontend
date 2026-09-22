@@ -54,11 +54,11 @@ function App() {
               <Route path="/catalogue" element={<CataloguePage />} />
               <Route path="/inventory" element={<InventoryDashboardPage />} />
               <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
+              <Route path="/inventory/batches/new" element={<RecordBatchPage />} />
             </Route>
             <Route element={<ProtectedRoute roles={['InventoryManager', 'Admin']} />}>
               <Route path="/catalogue/new" element={<AddMedicinePage />} />
               <Route path="/catalogue/:medicineId/edit" element={<EditMedicinePage />} />
-              <Route path="/inventory/batches/new" element={<RecordBatchPage />} />
               <Route path="/inventory/low-stock" element={<LowStockPage />} />
               <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
             </Route>

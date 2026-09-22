@@ -9,6 +9,7 @@ import { getInventory, getLowStock } from '../api/inventoryApi'
 export default function InventoryDashboardPage() {
   const { user } = useAuth()
   const canManage = user.roles.some((role) => ['Admin', 'InventoryManager'].includes(role))
+  const canEditInventory = user.roles.some((role) => ['Admin', 'InventoryManager', 'Pharmacist'].includes(role))
   const [data, setData] = useState({ items: [] })
   const [lowStockCount, setLowStockCount] = useState(0)
   const [error, setError] = useState('')
@@ -45,7 +46,7 @@ export default function InventoryDashboardPage() {
             <Link to="/inventory/sale-issues" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sale updates</Link>
             {canManage && <Link to="/inventory/purchase-receipts" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Purchase updates</Link>}
             {canManage && <Link to="/inventory/low-stock" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Low stock</Link>}
-            {canManage && <Link to="/inventory/batches/new" className="gradient-btn rounded-lg px-5 py-3 text-center font-semibold text-white">Record batch</Link>}
+            {canEditInventory && <Link to="/inventory/batches/new" className="gradient-btn rounded-lg px-5 py-3 text-center font-semibold text-white">Record batch</Link>}
             <DashboardLogoutButton />
           </nav>
         </div>
@@ -58,7 +59,7 @@ export default function InventoryDashboardPage() {
 
         {loading && <p role="status" className="rounded-2xl bg-white p-10 text-center text-slate-600 shadow-sm">Loading inventory…</p>}
         {!loading && error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-700"><p>{error}</p><button type="button" onClick={retry} className="mt-3 font-semibold underline">Try again</button></div>}
-        {!loading && !error && <InventoryTable items={data.items} />}
+        {!loading && !error && <InventoryTable items={data.items} canEditInventory={canEditInventory} />}
       </div>
     </main>
   )
