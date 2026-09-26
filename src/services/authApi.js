@@ -125,9 +125,12 @@ export const authenticatedServiceRequest = async (baseUrl, path, options = {}) =
     const data = response.status === 204 ? null : await response.json().catch(() => null)
     if (!response.ok) {
       const fallback = response.status >= 500
-        ? `Catalogue and Inventory API is unavailable (HTTP ${response.status}). Confirm the API is running on port 5000.`
+        ? `The Catalogue and Inventory service could not load this data (HTTP ${response.status}). Please retry in a moment; if it continues, contact your system administrator.`
         : `The request could not be completed (HTTP ${response.status}).`
-      throw new ApiError(data?.detail || data?.title || fallback, response.status, data?.errors || {}, data || {})
+      const safeServerMessage = response.status >= 500 && data?.title === 'An unexpected error occurred.'
+        ? fallback
+        : data?.detail || data?.title || fallback
+      throw new ApiError(safeServerMessage, response.status, data?.errors || {}, data || {})
     }
     if (data == null) {
       throw new ApiError('The Catalogue and Inventory service returned an invalid response. Please try again.', response.status)

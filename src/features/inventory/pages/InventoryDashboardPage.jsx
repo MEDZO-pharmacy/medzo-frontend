@@ -9,7 +9,7 @@ import { getInventory, getLowStock } from '../api/inventoryApi'
 export default function InventoryDashboardPage() {
   const { user } = useAuth()
   const canManage = user.roles.some((role) => ['Admin', 'InventoryManager'].includes(role))
-  const canEditInventory = user.roles.some((role) => ['Admin', 'InventoryManager', 'Pharmacist'].includes(role))
+  const canEditInventory = canManage
   const [data, setData] = useState({ items: [] })
   const [lowStockCount, setLowStockCount] = useState(0)
   const [error, setError] = useState('')
@@ -45,7 +45,8 @@ export default function InventoryDashboardPage() {
             <Link to="/catalogue" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">{canManage ? 'Manage medicines' : 'Medicine catalogue'}</Link>
             <Link to="/inventory/sale-issues" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sale updates</Link>
             {canManage && <Link to="/inventory/purchase-receipts" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Purchase updates</Link>}
-            {canManage && <Link to="/inventory/low-stock" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Low stock</Link>}`n            {canManage && <Link to="/inventory/near-expiry" className="rounded-lg border border-amber-500 bg-white px-5 py-3 text-center font-semibold text-amber-800 hover:bg-amber-50">Near expiry</Link>}
+            {canManage && <Link to="/inventory/low-stock" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Low stock</Link>}
+            {canManage && <Link to="/inventory/near-expiry" className="rounded-lg border border-amber-500 bg-white px-5 py-3 text-center font-semibold text-amber-800 hover:bg-amber-50">Near expiry</Link>}
             {canEditInventory && <Link to="/inventory/batches/new" className="gradient-btn rounded-lg px-5 py-3 text-center font-semibold text-white">Record batch</Link>}
             <DashboardLogoutButton />
           </nav>
