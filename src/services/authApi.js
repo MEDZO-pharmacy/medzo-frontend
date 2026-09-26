@@ -1,0 +1,187 @@
+const API_BASE_URL = (import.meta.env.VITE_AUTH_API_URL || import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
+
+let accessToken = null
+let accessTokenExpiresAt = null
+let refreshPromise = null
+let sessionListener = () => {}
+
+export class ApiError extends Error {
+  constructor(message, status = 0, errors = {}, data = {}) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.errors = errors
+    this.data = data
+  }
+}
+
+const request = async (path, options = {}) => {
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      credentials: 'include',
+      ...options,
+      headers: {
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+      },
+    })
+  } catch {
+    throw new ApiError('Cannot connect to the service. Please try again.')
+  }
+
+  const contentType = response.headers.get('content-type') || ''
+  const data = contentType.includes('application/json') ? await response.json() : null
+  if (!response.ok) {
+    throw new ApiError(
+      data?.message || data?.title || 'The request could not be completed.',
+      response.status,
+      data?.errors || {},
+      data || {},
+    )
+  }
+  return data
+}
+
+const rememberSession = (session) => {
+  accessToken = session?.token || null
+  accessTokenExpiresAt = session?.expiresAt ? new Date(session.expiresAt).getTime() : null
+  sessionListener(session || null)
+  return session
+}
+
+export const setSessionListener = (listener) => {
+  sessionListener = listener || (() => {})
+}
+
+export const login = async (credentials) => rememberSession(await request('/auth/login', {
+  method: 'POST',
+  body: JSON.stringify(credentials),
+}))
+
+export const register = async (account) => rememberSession(await request('/auth/register', {
+  method: 'POST',
+  body: JSON.stringify(account),
+}))
+
+export const refreshSession = async () => {
+  if (!refreshPromise) {
+    refreshPromise = request('/auth/refresh', { method: 'POST' })
+      .then(rememberSession)
+      .catch((error) => {
+        rememberSession(null)
+        throw error
+      })
+      .finally(() => { refreshPromise = null })
+  }
+  return refreshPromise
+}
+
+export const revokeSession = async () => {
+  try {
+    await request('/auth/revoke', { method: 'POST' })
+  } finally {
+    rememberSession(null)
+  }
+}
+
+export const authenticatedRequest = async (path, options = {}) => {
+  if (!accessToken || (accessTokenExpiresAt && accessTokenExpiresAt <= Date.now() + 30_000)) {
+    await refreshSession()
+  }
+
+  const send = () => request(path, {
+    ...options,
+    headers: { ...options.headers, Authorization: `Bearer ${accessToken}` },
+  })
+
+  try {
+    return await send()
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 401) throw error
+    await refreshSession()
+    return send()
+  }
+}
+
+export const authenticatedServiceRequest = async (baseUrl, path, options = {}) => {
+  // Relative paths work only through Vite's development proxy. Azure Static
+  // Web Apps otherwise returns the SPA document instead of API JSON.
+  if (import.meta.env.PROD && (!baseUrl || baseUrl.startsWith('/'))) {
+    throw new ApiError('The Catalogue and Inventory service has not been deployed or configured yet.', 503)
+  }
+
+  if (!accessToken || (accessTokenExpiresAt && accessTokenExpiresAt <= Date.now() + 30_000)) await refreshSession()
+  const send = async () => {
+    let response
+    try {
+      response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
+        ...options,
+        headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers, Authorization: `Bearer ${accessToken}` },
+      })
+    } catch {
+      throw new ApiError('Cannot connect to the Catalogue and Inventory service. Confirm that the API is running, then try again.')
+    }
+    const data = response.status === 204 ? null : await response.json().catch(() => null)
+    if (!response.ok) {
+      const fallback = response.status >= 500
+        ? `The Catalogue and Inventory service could not load this data (HTTP ${response.status}). Please retry in a moment; if it continues, contact your system administrator.`
+        : `The request could not be completed (HTTP ${response.status}).`
+      const safeServerMessage = response.status >= 500 && data?.title === 'An unexpected error occurred.'
+        ? fallback
+        : data?.detail || data?.title || fallback
+      throw new ApiError(safeServerMessage, response.status, data?.errors || {}, data || {})
+    }
+    if (data == null) {
+      throw new ApiError('The Catalogue and Inventory service returned an invalid response. Please try again.', response.status)
+    }
+    return data
+  }
+  try { return await send() } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 401) throw error
+    await refreshSession()
+    return send()
+  }
+}
+
+export const publicServiceRequest = async (baseUrl, path, options = {}) => {
+  let response
+  try {
+    response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, options)
+  } catch {
+    throw new ApiError('The medicine catalogue is temporarily unavailable. Please try again.')
+  }
+  const data = await response.json().catch(() => null)
+  if (!response.ok) throw new ApiError(data?.detail || data?.title || 'The medicine catalogue could not be loaded.', response.status, data?.errors || {}, data || {})
+  if (!data) throw new ApiError('The medicine catalogue returned an invalid response. Please try again.')
+  return data
+}
+
+export const getReviews = () => request('/reviews')
+export const createReview = (review) => request('/reviews', {
+  method: 'POST',
+  body: JSON.stringify(review),
+})
+export const sendContactMessage = (message) => request('/contact', {
+  method: 'POST',
+  body: JSON.stringify(message),
+})
+
+export const getDashboard = (rolePath) => authenticatedRequest(`/dashboard/${rolePath}`)
+export const createUser = (user) => authenticatedRequest('/users', {
+  method: 'POST',
+  body: JSON.stringify(user),
+})
+export const approveStaffId = (approval) => authenticatedRequest('/users/staff-invitations', {
+  method: 'POST',
+  body: JSON.stringify(approval),
+})
+export const getStaffInvitations = () => authenticatedRequest('/users/staff-invitations')
+export const updateManagedUser = (userId, user) => authenticatedRequest(`/users/${userId}/managed`, {
+  method: 'PUT',
+  body: JSON.stringify(user),
+})
+export const setUserStatus = (userId, isActive) => authenticatedRequest(`/users/${userId}/status`, {
+  method: 'PATCH',
+  body: JSON.stringify({ isActive }),
+})
