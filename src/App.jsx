@@ -63,13 +63,9 @@ function App() {
               <Route path="/catalogue/new" element={<AddMedicinePage />} />
               <Route path="/catalogue/:medicineId/edit" element={<EditMedicinePage />} />
               <Route path="/inventory/low-stock" element={<LowStockPage />} />
-<<<<<<< HEAD
               <Route path="/inventory/batches/new" element={<RecordBatchPage />} />
               <Route path="/inventory/near-expiry" element={<NearExpiryAlertsPage />} />
-=======
-              <Route path="/inventory/near-expiry" element={<NearExpiryAlertsPage />} />
               <Route path="/inventory/batch-removals" element={<BatchRemovalPage />} />
->>>>>>> 7ca011d (feat: add batch removal navigation)
               <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
             </Route>
             <Route element={<ProtectedRoute roles={['Admin']} />}>

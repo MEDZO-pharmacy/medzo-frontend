@@ -47,10 +47,7 @@ export default function InventoryDashboardPage() {
             {canManage && <Link to="/inventory/purchase-receipts" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Purchase updates</Link>}
             {canManage && <Link to="/inventory/low-stock" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Low stock</Link>}
             {canManage && <Link to="/inventory/near-expiry" className="rounded-lg border border-amber-500 bg-white px-5 py-3 text-center font-semibold text-amber-800 hover:bg-amber-50">Near expiry</Link>}
-<<<<<<< HEAD
-=======
             {canManage && <Link to="/inventory/batch-removals" className="rounded-lg border border-red-300 bg-white px-5 py-3 text-center font-semibold text-red-700 hover:bg-red-50">Remove stock</Link>}
->>>>>>> 7ca011d (feat: add batch removal navigation)
             {canEditInventory && <Link to="/inventory/batches/new" className="gradient-btn rounded-lg px-5 py-3 text-center font-semibold text-white">Record batch</Link>}
             <DashboardLogoutButton />
           </nav>
