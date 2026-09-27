@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Download, Minus, Plus, ReceiptText, ShoppingCart, Trash2 } from 'lucide-react'
+import { getInventory } from '../../inventory/api/inventoryApi'
 import { completeSale } from '../api/salesApi'
 
 const createSaleReference = () => {
@@ -107,6 +108,29 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
     setLines((current) => current.filter((line) => line.medicineId !== medicineId))
   }
 
+  const refreshDashboard = async () => {
+    try {
+      await onCompleted?.()
+    } catch {
+      // Keep the original sale error visible if the dashboard refresh also fails.
+    }
+  }
+
+  const validateLatestStock = async () => {
+    const latestInventory = await getInventory({ pageSize: 1000 })
+    const latestDetails = new Map((latestInventory.items || []).map((item) => [item.medicineId, item]))
+    const unavailableLine = lines.find((line) => {
+      const latest = latestDetails.get(line.medicineId)
+      return !latest || line.quantity > Number(latest.quantityOnHand || 0)
+    })
+
+    if (!unavailableLine) return true
+
+    await refreshDashboard()
+    setMessage('insufficient stock')
+    return false
+  }
+
   const submitSale = async () => {
     resetMessage()
     if (lines.length === 0) {
@@ -116,6 +140,9 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
 
     setStatus('saving')
     try {
+      const hasLatestStock = await validateLatestStock()
+      if (!hasLatestStock) return
+
       const result = await completeSale({
         saleId: crypto.randomUUID(),
         saleReference,
@@ -132,6 +159,7 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
         setMessage('Sale endpoint unavailable. Restart the Catalogue API.')
       } else {
         setMessage(error.status === 409 || text.toLowerCase().includes('insufficient') ? 'insufficient stock' : text || 'Sale could not be completed.')
+        if (error.status === 409 || text.toLowerCase().includes('insufficient')) await refreshDashboard()
       }
     } finally {
       setStatus('idle')
