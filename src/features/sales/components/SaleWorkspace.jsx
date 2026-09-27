@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Download, Minus, Plus, ReceiptText, ShoppingCart, Trash2 } from 'lucide-react'
 import { completeSale } from '../api/salesApi'
+import ExpiredStockWarning from './ExpiredStockWarning'
 
 const createSaleReference = () => {
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)
@@ -130,8 +131,10 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
       const text = error.message || ''
       if (error.status === 404) {
         setMessage('Sale endpoint unavailable. Restart the Catalogue API.')
+      } else if (text.toLowerCase().includes('expired')) {
+        setMessage(text)
       } else {
-        setMessage(error.status === 409 || text.toLowerCase().includes('insufficient') ? 'insufficient stock' : text || 'Sale could not be completed.')
+        setMessage(error.status === 409 || text.toLowerCase().includes('insufficient') ? 'Insufficient sellable stock.' : text || 'Sale could not be completed.')
       }
     } finally {
       setStatus('idle')
@@ -189,7 +192,9 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
         </button>
       </form>
 
-      {message && <p role="status" className={`mt-4 rounded-lg p-3 text-sm ${message === 'Sale completed and stock updated.' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-800'}`}>{message}</p>}
+      {message && (message.toLowerCase().includes('expired')
+        ? <ExpiredStockWarning message={message} />
+        : <p role="status" className={`mt-4 rounded-lg p-3 text-sm ${message === 'Sale completed and stock updated.' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-800'}`}>{message}</p>)}
 
       <div className="mt-5 overflow-x-auto">
         <table className="w-full text-left text-sm">
