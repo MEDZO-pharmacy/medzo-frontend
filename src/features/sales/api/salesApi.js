@@ -8,6 +8,11 @@ export const completeSale = (sale) => authenticatedServiceRequest(inventoryBase,
   body: JSON.stringify(sale),
 })
 
+export const searchSaleItems = ({ search = '', page = 1, pageSize = 100 } = {}) => authenticatedServiceRequest(
+  salesBase,
+  `/api/sale-items?search=${encodeURIComponent(search)}&page=${page}&pageSize=${pageSize}`,
+)
+
 export const createSale = ({ idempotencyKey, items }) => authenticatedServiceRequest(salesBase, '/api/sales', {
   method: 'POST',
   body: JSON.stringify({ idempotencyKey, items }),
