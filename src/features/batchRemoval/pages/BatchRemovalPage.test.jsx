@@ -8,7 +8,7 @@ import { getRemovalCandidates, removeBatch } from '../api/batchRemovalApi'
 vi.mock('../../../auth/AuthContext', () => ({ useAuth: () => ({ user: { staffId: 'I1001', username: 'manager' } }) }))
 vi.mock('../api/batchRemovalApi', () => ({ getRemovalCandidates: vi.fn(), removeBatch: vi.fn() }))
 
-const candidate = { batchId: 'batch-1', productId: 'p1', batchNumber: 'LOT-EXPIRED', expiryDate: '2026-09-21', daysUntilExpiry: -1, remainingQuantity: 7, isExpired: true }
+const candidate = { id: 'batch-1', medicineId: 'm1', medicineName: 'Amoxicillin 250mg', batchNumber: 'LOT-EXPIRED', expiryDate: '2026-09-21', daysUntilExpiry: -1, remainingQuantity: 7, isExpired: true }
 
 describe('BatchRemovalPage', () => {
   afterEach(cleanup)

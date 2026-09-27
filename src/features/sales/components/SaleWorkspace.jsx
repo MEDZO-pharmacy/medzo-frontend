@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Download, Minus, Plus, ReceiptText, ShoppingCart, Trash2 } from 'lucide-react'
 import { completeSale } from '../api/salesApi'
+import { downloadReceiptPdf } from '../utils/receiptPdf'
 
 const createSaleReference = () => {
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)
@@ -8,35 +9,6 @@ const createSaleReference = () => {
 }
 
 const money = (value) => `Rs. ${Number(value || 0).toFixed(2)}`
-
-const buildReceiptText = (receipt, lineDetails) => {
-  const lines = [
-    'MEDZO PHARMACY',
-    'Sale Receipt',
-    '',
-    `Receipt: ${receipt.saleReference}`,
-    `Sale ID: ${receipt.saleId}`,
-    `Completed: ${new Date(receipt.completedAtUtc).toLocaleString()}`,
-    '',
-    'Items',
-  ]
-
-  receipt.items.forEach((item) => {
-    const detail = lineDetails.get(item.medicineId)
-    lines.push(`${item.medicineName} x ${item.quantity} - ${money((detail?.unitPrice || 0) * item.quantity)}`)
-    item.batchAllocations.forEach((batch) => {
-      lines.push(`  Batch ${batch.batchNumber}, exp ${batch.expiryDate}, qty ${batch.quantity}`)
-    })
-  })
-
-  const total = receipt.items.reduce((sum, item) => {
-    const detail = lineDetails.get(item.medicineId)
-    return sum + Number(detail?.unitPrice || 0) * item.quantity
-  }, 0)
-
-  lines.push('', `Total: ${money(total)}`)
-  return lines.join('\n')
-}
 
 export default function SaleWorkspace({ medicines = [], inventory = [], onCompleted }) {
   const [selectedMedicineId, setSelectedMedicineId] = useState('')
@@ -140,16 +112,7 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
 
   const downloadReceipt = () => {
     if (!receipt) return
-    const content = buildReceiptText(receipt, medicineDetails)
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${receipt.saleReference || receipt.saleId}-receipt.txt`
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+    downloadReceiptPdf(receipt, { lineDetails: medicineDetails })
   }
 
   return (

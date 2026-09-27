@@ -19,19 +19,22 @@ export default function BatchRemovalPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
+  const applyResult = useCallback((request) => {
+    request
+      .then(setData)
+      .catch((requestError) => setError(requestError.message || 'Batches available for removal could not be loaded.'))
+      .finally(() => setLoading(false))
+  }, [])
+
   const load = useCallback(async () => {
     setLoading(true)
     setError('')
-    try {
-      setData(await getRemovalCandidates())
-    } catch (requestError) {
-      setError(requestError.message || 'Batches available for removal could not be loaded.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    applyResult(getRemovalCandidates())
+  }, [applyResult])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    applyResult(getRemovalCandidates())
+  }, [applyResult])
 
   const removalReason = useMemo(() => reason === 'Other' ? otherReason.trim() : reason, [reason, otherReason])
   const selectBatch = (batch) => {
@@ -48,7 +51,7 @@ export default function BatchRemovalPage() {
     setError('')
     setNotice('')
     try {
-      const result = await removeBatch(selected.batchId, {
+      const result = await removeBatch(selected.id, {
         idempotencyKey: crypto.randomUUID(),
         reason: removalReason,
         removedBy: user?.staffId || user?.username || 'Inventory Manager',
@@ -80,12 +83,12 @@ export default function BatchRemovalPage() {
         <div className="flex items-center justify-between border-b p-5"><div><h2 className="font-bold text-[#0a192f]">Eligible batches</h2><p className="mt-1 text-sm text-slate-600">Expired batches and batches expiring within 30 days.</p></div><button type="button" onClick={load} className="rounded-lg border p-2 text-medzo-blue" aria-label="Refresh batches"><RefreshCw size={18} /></button></div>
         {loading && <p role="status" className="p-10 text-center text-slate-600">Loading batches…</p>}
         {!loading && data.items.length === 0 && <div className="p-10 text-center"><PackageX className="mx-auto text-medzo-blue" /><p className="mt-3 font-semibold text-[#0a192f]">No active batches need disposal.</p></div>}
-        {!loading && data.items.length > 0 && <table className="min-w-[720px] w-full text-left text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4">Product</th><th className="p-4">Batch</th><th className="p-4">Expiry</th><th className="p-4">Units</th><th className="p-4">Status</th><th className="p-4"><span className="sr-only">Action</span></th></tr></thead><tbody>{data.items.map((batch) => <tr key={batch.batchId} className="border-t border-slate-100"><td className="p-4 font-semibold text-[#0a192f]">{batch.productId}</td><td className="p-4">{batch.batchNumber}</td><td className="p-4">{batch.expiryDate}</td><td className="p-4">{batch.remainingQuantity}</td><td className="p-4"><span className={`rounded-full px-3 py-1 text-xs font-bold ${batch.isExpired ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>{batch.isExpired ? 'Expired' : `${batch.daysUntilExpiry} days left`}</span></td><td className="p-4"><button type="button" onClick={() => selectBatch(batch)} className="rounded-lg border border-red-200 px-3 py-2 font-semibold text-red-700 hover:bg-red-50"><Trash2 className="mr-1 inline" size={15} />Remove</button></td></tr>)}</tbody></table>}
+        {!loading && data.items.length > 0 && <table className="min-w-[720px] w-full text-left text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4">Medicine</th><th className="p-4">Batch</th><th className="p-4">Expiry</th><th className="p-4">Units</th><th className="p-4">Status</th><th className="p-4"><span className="sr-only">Action</span></th></tr></thead><tbody>{data.items.map((batch) => <tr key={batch.id} className="border-t border-slate-100"><td className="p-4 font-semibold text-[#0a192f]">{batch.medicineName}</td><td className="p-4">{batch.batchNumber}</td><td className="p-4">{batch.expiryDate}</td><td className="p-4">{batch.remainingQuantity}</td><td className="p-4"><span className={`rounded-full px-3 py-1 text-xs font-bold ${batch.isExpired ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>{batch.isExpired ? 'Expired' : `${batch.daysUntilExpiry} days left`}</span></td><td className="p-4"><button type="button" onClick={() => selectBatch(batch)} className="rounded-lg border border-red-200 px-3 py-2 font-semibold text-red-700 hover:bg-red-50"><Trash2 className="mr-1 inline" size={15} />Remove</button></td></tr>)}</tbody></table>}
       </section>
 
       <aside className="h-fit rounded-2xl bg-white p-5 shadow-sm"><div className="flex gap-3"><span className="rounded-xl bg-red-50 p-2 text-red-700"><AlertTriangle /></span><div><h2 className="font-bold text-[#0a192f]">Confirm disposal</h2><p className="mt-1 text-sm text-slate-600">The batch is hidden from active stock and sales. Historical receipts remain available.</p></div></div>
         {!selected && <p className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">Choose an eligible batch to start a recorded disposal.</p>}
-        {selected && <form onSubmit={submit} className="mt-6 space-y-4"><div className="rounded-xl bg-slate-50 p-4 text-sm"><p className="font-bold text-[#0a192f]">{selected.batchNumber}</p><p>{selected.productId} · {selected.remainingQuantity} units · expires {selected.expiryDate}</p></div><label className="block text-sm font-semibold text-[#0a192f]">Reason for removal<select value={reason} onChange={(event) => setReason(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal"><option value="">Select a reason</option>{reasons.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>{reason === 'Other' && <label className="block text-sm font-semibold text-[#0a192f]">Describe the reason<textarea value={otherReason} onChange={(event) => setOtherReason(event.target.value)} maxLength="500" className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal" /></label>}<label className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} /><span>I confirm that this stock has been physically removed and should never be sold.</span></label><button disabled={!removalReason || !confirmed || saving} className="w-full rounded-lg bg-red-700 px-5 py-3 font-bold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50">{saving ? 'Removing batch…' : 'Confirm removal'}</button></form>}
+        {selected && <form onSubmit={submit} className="mt-6 space-y-4"><div className="rounded-xl bg-slate-50 p-4 text-sm"><p className="font-bold text-[#0a192f]">{selected.batchNumber}</p><p>{selected.medicineName} · {selected.remainingQuantity} units · expires {selected.expiryDate}</p></div><label className="block text-sm font-semibold text-[#0a192f]">Reason for removal<select value={reason} onChange={(event) => setReason(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal"><option value="">Select a reason</option>{reasons.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>{reason === 'Other' && <label className="block text-sm font-semibold text-[#0a192f]">Describe the reason<textarea value={otherReason} onChange={(event) => setOtherReason(event.target.value)} maxLength="500" className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal" /></label>}<label className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} /><span>I confirm that this stock has been physically removed and should never be sold.</span></label><button disabled={!removalReason || !confirmed || saving} className="w-full rounded-lg bg-red-700 px-5 py-3 font-bold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50">{saving ? 'Removing batch…' : 'Confirm removal'}</button></form>}
       </aside>
     </div>
   </div></main>
