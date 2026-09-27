@@ -78,7 +78,6 @@ export default function PharmacistDashboard() {
           <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <Link to="/catalogue" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Full catalogue</Link>
             <Link to="/inventory" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">View inventory</Link>
-            <Link to="/sales" className="gradient-btn rounded-lg px-5 py-3 text-center font-semibold text-white">Complete sale</Link>
             <Link to="/inventory/sale-issues" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sales history</Link>
             <DashboardLogoutButton fullWidth />
           </nav>
