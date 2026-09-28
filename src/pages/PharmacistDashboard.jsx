@@ -7,7 +7,6 @@ import MedicineTable from '../features/catalogue/components/MedicineTable'
 import { getInventory } from '../features/inventory/api/inventoryApi'
 import StockLevelCard from '../features/inventory/components/StockLevelCard'
 import SaleWorkspace from '../features/sales/components/SaleWorkspace'
-import SalesHistoryPanel from '../features/sales/components/SalesHistoryPanel'
 import DashboardLogoutButton from '../components/DashboardLogoutButton'
 
 export default function PharmacistDashboard() {
@@ -17,7 +16,6 @@ export default function PharmacistDashboard() {
   const [inventory, setInventory] = useState({ items: [] })
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState('')
-  const [salesHistoryRefresh, setSalesHistoryRefresh] = useState(0)
 
   const load = useCallback(async (search = '') => {
     setStatus('loading')
@@ -68,7 +66,6 @@ export default function PharmacistDashboard() {
 
   const handleSaleCompleted = async () => {
     await load(query)
-    setSalesHistoryRefresh((value) => value + 1)
   }
 
   return (
@@ -78,7 +75,7 @@ export default function PharmacistDashboard() {
           <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <Link to="/catalogue" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Full catalogue</Link>
             <Link to="/inventory" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">View inventory</Link>
-            <Link to="/inventory/sale-issues" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sales history</Link>
+            <Link to="/pharmacist/sales-history" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sales history</Link>
             <DashboardLogoutButton fullWidth />
           </nav>
         </aside>
@@ -88,7 +85,6 @@ export default function PharmacistDashboard() {
             <Link to="/" aria-label="Back to home" className="mb-3 inline-block font-semibold text-medzo-blue">Back to home</Link>
             <p className="text-sm font-bold uppercase tracking-wider text-medzo-green">Pharmacy workspace</p>
             <h1 className="mt-2 text-2xl font-bold text-[#0a192f] sm:text-3xl">Pharmacist Dashboard</h1>
-            <p className="mt-2 text-medzo-text-light">Search medicines and check current availability during a sale.</p>
             <p className="mt-2 text-sm font-semibold text-medzo-blue"><span>Signed in as</span> <span>{user?.firstName || user?.username} · {user?.staffId}</span></p>
           </header>
 
@@ -98,9 +94,8 @@ export default function PharmacistDashboard() {
           <StockLevelCard label="Low-stock medicines" value={lowStock} tone="red" />
         </section>
 
-        <SaleWorkspace medicines={medicines.items} inventory={inventory.items} onCompleted={handleSaleCompleted} />
+        <SaleWorkspace medicines={medicines.items} inventory={inventory.items} onCompleted={handleSaleCompleted} pharmacistUsername={user?.username || user?.firstName} />
 
-        <SalesHistoryPanel refreshKey={salesHistoryRefresh} />
 
         <section className="mt-6 rounded-2xl bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
@@ -112,16 +107,17 @@ export default function PharmacistDashboard() {
             {query && <button type="button" onClick={clearSearch} disabled={status === 'loading'} className="rounded-lg border border-slate-200 px-5 py-3 font-semibold text-medzo-text-light hover:bg-slate-50 disabled:opacity-60">Clear</button>}
             <button type="submit" disabled={status === 'loading'} className="gradient-btn rounded-lg px-6 py-3 font-bold text-white disabled:opacity-60">{status === 'loading' ? 'Searching...' : 'Search'}</button>
           </form>
-        </section>
-
-        <section className="mt-6" aria-live="polite" aria-busy={status === 'loading'}>
+        <div className="mt-6 border-t border-slate-100 pt-6" aria-live="polite" aria-busy={status === 'loading'}>
           {status === 'loading' && <p className="rounded-2xl bg-white p-8 text-center text-medzo-text-light shadow-sm">Loading pharmacy data...</p>}
           {status === 'error' && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700"><p>{error}</p><button type="button" onClick={() => load(query)} className="mt-3 font-semibold underline">Try again</button></div>}
           {status === 'ready' && medicines.items.length > 0 && <><div className="mb-3 flex items-center gap-2 text-sm text-medzo-text-light"><ClipboardList size={18} aria-hidden="true" /><span>{medicines.totalCount} {medicines.totalCount === 1 ? 'medicine' : 'medicines'} found</span></div><MedicineTable medicines={medicines.items} canManage={false} /></>}
           {status === 'ready' && medicines.items.length === 0 && <div className="rounded-2xl bg-white p-8 text-center shadow-sm"><Boxes className="mx-auto text-medzo-blue" aria-hidden="true" /><h2 className="mt-3 text-lg font-bold text-[#0a192f]">No medicines found</h2><p className="mt-2 text-medzo-text-light">Check the spelling or clear the search to restore the catalogue.</p><button type="button" onClick={clearSearch} className="mt-4 font-semibold text-medzo-blue hover:underline">Clear search</button></div>}
+          </div>
         </section>
         </div>
       </div>
     </main>
   )
 }
+
+

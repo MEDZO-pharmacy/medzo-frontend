@@ -13,7 +13,7 @@ const createSaleReference = () => {
 
 const money = (value) => `Rs. ${Number(value || 0).toFixed(2)}`
 
-export default function SaleWorkspace({ medicines = [], inventory = [], onCompleted }) {
+export default function SaleWorkspace({ medicines = [], inventory = [], onCompleted, pharmacistUsername }) {
   const [selectedMedicineId, setSelectedMedicineId] = useState('')
   const [medicineQuery, setMedicineQuery] = useState('')
   const [medicineDropdownOpen, setMedicineDropdownOpen] = useState(false)
@@ -152,8 +152,9 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
         saleId: crypto.randomUUID(),
         saleReference,
         items: lines,
+        pharmacistUsername,
       })
-      setReceipt(result)
+      setReceipt({ ...result, pharmacistUsername: result.pharmacistUsername || pharmacistUsername || 'Not recorded' })
       setLines([])
       setSaleReference(createSaleReference())
       setMessage('Sale completed and stock updated.')

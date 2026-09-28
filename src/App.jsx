@@ -24,6 +24,7 @@ import BatchRemovalPage from './features/batchRemoval/pages/BatchRemovalPage'
 import PurchaseReceiptsPage from './features/inventory/pages/PurchaseReceiptsPage'
 import SaleIssuesPage from './features/inventory/pages/SaleIssuesPage'
 import SalesPage from './features/sales/pages/SalesPage'
+import PharmacistSalesHistoryPage from './features/sales/pages/PharmacistSalesHistoryPage'
 import './index.css'
 
 const MainLayout = () => {
@@ -53,11 +54,12 @@ function App() {
             <Route element={<ProtectedRoute roles={['Pharmacist']} />}>
               <Route path="/pharmacist" element={<PharmacistDashboard />} />
               <Route path="/sales" element={<SalesPage />} />
+              <Route path="/pharmacist/sales-history" element={<PharmacistSalesHistoryPage />} />
             </Route>
             <Route element={<ProtectedRoute roles={['Pharmacist', 'InventoryManager', 'Admin']} />}>
               <Route path="/catalogue" element={<CataloguePage />} />
               <Route path="/inventory" element={<InventoryDashboardPage />} />
-              <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
+
             </Route>
             <Route element={<ProtectedRoute roles={['InventoryManager', 'Admin']} />}>
               <Route path="/catalogue/new" element={<AddMedicinePage />} />
@@ -67,6 +69,8 @@ function App() {
               <Route path="/inventory/near-expiry" element={<NearExpiryAlertsPage />} />
               <Route path="/inventory/batch-removals" element={<BatchRemovalPage />} />
               <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
+              <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
+
             </Route>
             <Route element={<ProtectedRoute roles={['Admin']} />}>
               <Route path="/admin" element={<AdminDashboard />} />
@@ -81,3 +85,5 @@ function App() {
 }
 
 export default App
+
+

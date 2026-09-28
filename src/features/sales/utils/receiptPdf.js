@@ -9,9 +9,8 @@ const pdfEscape = (value) => String(value ?? '')
   .replace(/\)/g, '\\)')
   .replace(/[\r\n]+/g, ' ')
 
-const drawText = (text, x, y, { size = 10, font = 'F1' } = {}) =>
-  `BT /${font} ${size} Tf ${x} ${y} Td (${pdfEscape(text)}) Tj ET`
-
+const drawText = (text, x, y, { size = 10, font = 'F1', color = '0.06 0.09 0.16' } = {}) =>
+  `${color} rg BT /${font} ${size} Tf ${x} ${y} Td (${pdfEscape(text)}) Tj ET`
 const drawFilledRect = (x, y, width, height, color) =>
   `${color} rg ${x} ${y} ${width} ${height} re f`
 
@@ -72,6 +71,7 @@ export const createReceiptPdfBlob = (receipt, { lineDetails = new Map() } = {}) 
     ? completedAt.toLocaleString()
     : 'Unavailable'
   const receiptNumber = receipt.saleReference || receipt.receiptNumber || receipt.saleId || 'Sale receipt'
+  const pharmacistUsername = receipt.pharmacistUsername || receipt.pharmacist || receipt.completedByUsername || 'Not recorded'
   const subtotal = rows.reduce((sum, row) => sum + row.lineTotal, 0)
   const discount = Number(receipt.discount || 0)
   const tax = Number(receipt.tax || 0)
@@ -82,22 +82,24 @@ export const createReceiptPdfBlob = (receipt, { lineDetails = new Map() } = {}) 
     drawText('Medzo Pharmacy', 72, 786, { size: 22, font: 'F2' }),
     '0.29 0.36 0.47 rg',
     drawText('Sales Receipt', 72, 764, { size: 10 }),
-    drawFilledRect(72, 696, 451, 54, '0.93 0.99 0.96'),
-    drawStrokedRect(72, 696, 451, 54, '0.52 0.93 0.67'),
+    drawFilledRect(72, 676, 451, 74, '0.93 0.99 0.96'),
+    drawStrokedRect(72, 676, 451, 74, '0.52 0.93 0.67'),
     drawText('Receipt', 88, 730, { size: 10, font: 'F2' }),
     drawText(receiptNumber, 174, 730, { size: 10 }),
     drawText('Completed', 88, 710, { size: 10, font: 'F2' }),
     drawText(completedText, 174, 710, { size: 10 }),
-    drawText('Items', 72, 662, { size: 13, font: 'F2' }),
-    drawFilledRect(72, 624, 451, 26, '0.95 0.97 0.99'),
-    drawStrokedRect(72, 624, 451, 26),
-    drawText('Medicine', 84, 634, { size: 9, font: 'F2' }),
-    drawText('Qty', 285, 634, { size: 9, font: 'F2' }),
-    drawText('Batch', 334, 634, { size: 9, font: 'F2' }),
-    drawText('Line Total', 458, 634, { size: 9, font: 'F2' }),
+    drawText('Pharmacist', 88, 690, { size: 10, font: 'F2' }),
+    drawText(pharmacistUsername, 174, 690, { size: 10 }),
+    drawText('Items', 72, 642, { size: 13, font: 'F2' }),
+    drawFilledRect(72, 604, 451, 26, '0.95 0.97 0.99'),
+    drawStrokedRect(72, 604, 451, 26),
+    drawText('Medicine', 84, 614, { size: 9, font: 'F2' }),
+    drawText('Qty', 285, 614, { size: 9, font: 'F2' }),
+    drawText('Batch', 334, 614, { size: 9, font: 'F2' }),
+    drawText('Line Total', 458, 614, { size: 9, font: 'F2' }),
   ]
 
-  let y = 600
+  let y = 580
   rows.slice(0, 12).forEach((row) => {
     commands.push(drawStrokedRect(72, y - 8, 451, 24))
     commands.push(drawText(row.medicineName.slice(0, 34), 84, y, { size: 9 }))
