@@ -1,8 +1,10 @@
+const soldUnits = (item) => Math.abs(Number(item.quantitySold || 0))
+
 export default function SaleIssueTable({ items = [] }) {
   if (!items.length) return <p className="rounded-2xl bg-white p-10 text-center text-[#6b7280]">No sale stock updates have been processed yet.</p>
 
   return <div className="overflow-x-auto rounded-2xl bg-white shadow-sm" role="region" aria-label="Automatically processed sales" tabIndex="0">
-    <table className="min-w-[760px] w-full text-left">
+    <table className="min-w-[860px] w-full text-left">
       <thead className="bg-slate-50 text-sm text-slate-500">
         <tr>{['Processed', 'Sale reference', 'Medicine', 'Batch', 'Expiry', 'Sold', 'New balance'].map(label => <th scope="col" className="p-4" key={label}>{label}</th>)}</tr>
       </thead>
@@ -12,9 +14,10 @@ export default function SaleIssueTable({ items = [] }) {
         <td className="p-4 font-bold text-[#0a192f]">{item.medicineName}</td>
         <td className="p-4">{item.batchNumber}</td>
         <td className="p-4">{item.expiryDate}</td>
-        <td className="p-4 font-semibold text-red-700">−{item.quantitySold}</td>
+        <td className="p-4 font-semibold">{soldUnits(item)}</td>
         <td className="p-4">{item.quantityAfter}</td>
       </tr>)}</tbody>
     </table>
   </div>
 }
+
