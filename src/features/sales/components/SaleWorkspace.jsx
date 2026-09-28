@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { Download, Minus, Plus, ReceiptText, ShoppingCart, Trash2 } from 'lucide-react'
 import { getInventory } from '../../inventory/api/inventoryApi'
 import { completeSale } from '../api/salesApi'
+import { downloadReceiptPdf } from '../utils/receiptPdf'
 import ExpiredStockWarning from './ExpiredStockWarning'
+
 
 const createSaleReference = () => {
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)
@@ -11,37 +13,10 @@ const createSaleReference = () => {
 
 const money = (value) => `Rs. ${Number(value || 0).toFixed(2)}`
 
-const buildReceiptText = (receipt, lineDetails) => {
-  const lines = [
-    'MEDZO PHARMACY',
-    'Sale Receipt',
-    '',
-    `Receipt: ${receipt.saleReference}`,
-    `Sale ID: ${receipt.saleId}`,
-    `Completed: ${new Date(receipt.completedAtUtc).toLocaleString()}`,
-    '',
-    'Items',
-  ]
-
-  receipt.items.forEach((item) => {
-    const detail = lineDetails.get(item.medicineId)
-    lines.push(`${item.medicineName} x ${item.quantity} - ${money((detail?.unitPrice || 0) * item.quantity)}`)
-    item.batchAllocations.forEach((batch) => {
-      lines.push(`  Batch ${batch.batchNumber}, exp ${batch.expiryDate}, qty ${batch.quantity}`)
-    })
-  })
-
-  const total = receipt.items.reduce((sum, item) => {
-    const detail = lineDetails.get(item.medicineId)
-    return sum + Number(detail?.unitPrice || 0) * item.quantity
-  }, 0)
-
-  lines.push('', `Total: ${money(total)}`)
-  return lines.join('\n')
-}
-
 export default function SaleWorkspace({ medicines = [], inventory = [], onCompleted }) {
   const [selectedMedicineId, setSelectedMedicineId] = useState('')
+  const [medicineQuery, setMedicineQuery] = useState('')
+  const [medicineDropdownOpen, setMedicineDropdownOpen] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [saleReference, setSaleReference] = useState(createSaleReference())
   const [lines, setLines] = useState([])
@@ -57,6 +32,25 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
   }, [inventory, medicines])
 
   const sellableItems = useMemo(() => inventory.filter((item) => item.quantityOnHand > 0), [inventory])
+  const medicineOptionLabel = (item) => `${item.name} (${item.quantityOnHand} available)`
+  const filteredSellableItems = useMemo(() => {
+    const search = medicineQuery.trim().toLowerCase()
+    if (!search) return sellableItems
+    return sellableItems.filter((item) =>
+      item.name?.toLowerCase().includes(search) ||
+      item.genericName?.toLowerCase().includes(search) ||
+      item.manufacturer?.toLowerCase().includes(search)
+    )
+  }, [medicineQuery, sellableItems])
+  const findMedicineFromQuery = (value) => {
+    const search = value.trim().toLowerCase()
+    if (!search) return null
+    return sellableItems.find((item) =>
+      item.medicineId === value ||
+      medicineOptionLabel(item).toLowerCase() === search ||
+      item.name?.toLowerCase() === search
+    ) || null
+  }
   const selectedLine = lines.find((line) => line.medicineId === selectedMedicineId)
   const saleTotal = lines.reduce((sum, line) => {
     const detail = medicineDetails.get(line.medicineId)
@@ -66,6 +60,14 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
   const resetMessage = () => {
     setMessage('')
     setReceipt(null)
+  }
+
+  const selectMedicine = (item) => {
+    setMedicineQuery(medicineOptionLabel(item))
+    setSelectedMedicineId(item.medicineId)
+    setQuantity(lines.find((line) => line.medicineId === item.medicineId)?.quantity || 1)
+    setMedicineDropdownOpen(false)
+    resetMessage()
   }
 
   const addOrUpdateLine = (event) => {
@@ -93,6 +95,8 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
         : [...current, nextLine]
     })
     setSelectedMedicineId('')
+    setMedicineQuery('')
+    setMedicineDropdownOpen(false)
     setQuantity(1)
   }
 
@@ -171,20 +175,11 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
 
   const downloadReceipt = () => {
     if (!receipt) return
-    const content = buildReceiptText(receipt, medicineDetails)
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${receipt.saleReference || receipt.saleId}-receipt.txt`
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+    downloadReceiptPdf(receipt, { lineDetails: medicineDetails })
   }
 
   return (
-    <section className="mt-6 rounded-2xl bg-white p-4 shadow-sm sm:p-6">
+    <section id="complete-sale" className="mt-6 scroll-mt-6 rounded-2xl bg-white p-4 shadow-sm sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex items-center gap-3">
@@ -201,16 +196,36 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
       </div>
 
       <form onSubmit={addOrUpdateLine} className="mt-5 grid gap-3 lg:grid-cols-[1fr_8rem_auto]">
-        <label className="text-sm font-semibold text-[#0a192f]">Medicine <span className="text-red-600" aria-hidden="true">*</span>
-          <select value={selectedMedicineId} onChange={(event) => {
-            const nextId = event.target.value
-            setSelectedMedicineId(nextId)
-            setQuantity(lines.find((line) => line.medicineId === nextId)?.quantity || 1)
-            resetMessage()
-          }} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 font-normal outline-none focus:border-medzo-blue focus:ring-2 focus:ring-medzo-blue/20">
-            <option value="">Select medicine</option>
-            {sellableItems.map((item) => <option key={item.medicineId} value={item.medicineId}>{item.name} ({item.quantityOnHand} available)</option>)}
-          </select>
+        <label className="relative text-sm font-semibold text-[#0a192f]">Medicine <span className="text-red-600" aria-hidden="true">*</span>
+          <input
+            type="search"
+            role="combobox"
+            aria-expanded={medicineDropdownOpen}
+            aria-controls="sale-medicine-options"
+            aria-autocomplete="list"
+            value={medicineQuery}
+            onChange={(event) => {
+              const nextQuery = event.target.value
+              const match = findMedicineFromQuery(nextQuery)
+              setMedicineQuery(nextQuery)
+              setSelectedMedicineId(match?.medicineId || '')
+              setQuantity(match ? lines.find((line) => line.medicineId === match.medicineId)?.quantity || 1 : 1)
+              setMedicineDropdownOpen(true)
+              resetMessage()
+            }}
+            onFocus={() => setMedicineDropdownOpen(true)}
+            onBlur={() => setMedicineDropdownOpen(false)}
+            placeholder="Search medicine by name"
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 font-normal outline-none focus:border-medzo-blue focus:ring-2 focus:ring-medzo-blue/20"
+          />
+          {medicineDropdownOpen && <div id="sale-medicine-options" role="listbox" className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+            {filteredSellableItems.map((item) => <button key={item.medicineId} type="button" role="option" aria-selected={selectedMedicineId === item.medicineId} onMouseDown={(event) => event.preventDefault()} onClick={() => selectMedicine(item)} className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left font-normal text-[#0a192f] hover:bg-blue-50">
+              <span className="min-w-0"><span className="block truncate font-semibold">{item.name}</span><span className="block truncate text-xs text-slate-500">{item.genericName || item.manufacturer}</span></span>
+              <span className="shrink-0 text-xs font-semibold text-medzo-blue">{item.quantityOnHand} available</span>
+            </button>)}
+            {filteredSellableItems.length === 0 && <p className="px-3 py-2 font-normal text-slate-500">No matching medicines</p>}
+          </div>}
+          {medicineQuery && !selectedMedicineId && <p className="mt-1 text-xs font-normal text-amber-700">Choose a matching medicine from the dropdown.</p>}
         </label>
         <label className="text-sm font-semibold text-[#0a192f]">Quantity <span className="text-red-600" aria-hidden="true">*</span>
           <input type="number" min="1" step="1" value={quantity} onChange={(event) => setQuantity(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 font-normal outline-none focus:border-medzo-blue focus:ring-2 focus:ring-medzo-blue/20" />

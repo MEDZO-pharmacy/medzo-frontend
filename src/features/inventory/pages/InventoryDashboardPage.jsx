@@ -43,10 +43,11 @@ export default function InventoryDashboardPage() {
           </div>
           <nav className="grid w-full gap-3 sm:grid-cols-2 lg:w-auto xl:grid-cols-3" aria-label="Inventory quick actions">
             <Link to="/catalogue" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">{canManage ? 'Manage medicines' : 'Medicine catalogue'}</Link>
-            <Link to="/inventory/sale-issues" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sale updates</Link>
+            <Link to="/inventory/sale-issues" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sales history</Link>
             {canManage && <Link to="/inventory/purchase-receipts" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Purchase updates</Link>}
             {canManage && <Link to="/inventory/low-stock" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Low stock</Link>}
             {canManage && <Link to="/inventory/near-expiry" className="rounded-lg border border-amber-500 bg-white px-5 py-3 text-center font-semibold text-amber-800 hover:bg-amber-50">Near expiry</Link>}
+            {canManage && <Link to="/inventory/batch-removals" className="rounded-lg border border-red-300 bg-white px-5 py-3 text-center font-semibold text-red-700 hover:bg-red-50">Remove stock</Link>}
             {canEditInventory && <Link to="/inventory/batches/new" className="gradient-btn rounded-lg px-5 py-3 text-center font-semibold text-white">Record batch</Link>}
             <DashboardLogoutButton />
           </nav>
