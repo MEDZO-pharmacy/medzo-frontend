@@ -1,7 +1,6 @@
 import { authenticatedServiceRequest } from '../../../services/authApi'
 
 const inventoryBase = import.meta.env.VITE_CATALOGUE_INVENTORY_API_URL || '/catalogue-inventory-api'
-const salesBase = import.meta.env.VITE_SALES_API_URL || '/sales-api'
 
 export const completeSale = (sale) => authenticatedServiceRequest(inventoryBase, '/api/inventory/sales', {
   method: 'POST',
@@ -9,13 +8,24 @@ export const completeSale = (sale) => authenticatedServiceRequest(inventoryBase,
 })
 
 export const searchSaleItems = ({ search = '', page = 1, pageSize = 100 } = {}) => authenticatedServiceRequest(
-  salesBase,
-  `/api/sale-items?search=${encodeURIComponent(search)}&page=${page}&pageSize=${pageSize}`,
+  inventoryBase,
+  `/api/catalogue/medicines?search=${encodeURIComponent(search)}&page=${page}&pageSize=${pageSize}`,
 )
 
-export const createSale = ({ idempotencyKey, items }) => authenticatedServiceRequest(salesBase, '/api/sales', {
-  method: 'POST',
-  body: JSON.stringify({ idempotencyKey, items }),
-})
-
-export const getSaleReceipt = (saleId) => authenticatedServiceRequest(salesBase, `/api/sales/${encodeURIComponent(saleId)}/receipt`)
+export const createSale = async ({ idempotencyKey, items }) => {
+  const receipt = await completeSale({
+    saleId: idempotencyKey,
+    saleReference: `SALE-${idempotencyKey.slice(0, 8)}`,
+    items: items.map(({ productId, quantity }) => ({ medicineId: productId, quantity })),
+  })
+  const mappedItems = receipt.items.map(item => ({
+    ...item,
+    productId: item.medicineId,
+  }))
+  return {
+    saleId: receipt.saleId,
+    alreadyProcessed: receipt.alreadyProcessed,
+    items: mappedItems,
+    receipt: { ...receipt, items: mappedItems },
+  }
+}

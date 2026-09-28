@@ -6,9 +6,11 @@ import { downloadReceiptPdf } from '../utils/receiptPdf'
 import ExpiredStockWarning from './ExpiredStockWarning'
 
 
-const createSaleReference = () => {
+const createSaleId = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`
+
+const createSaleReference = (saleId) => {
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)
-  return `SALE-${stamp}`
+  return `SALE-${stamp}-${saleId.slice(0, 8)}`
 }
 
 const money = (value) => `Rs. ${Number(value || 0).toFixed(2)}`
@@ -18,7 +20,8 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
   const [medicineQuery, setMedicineQuery] = useState('')
   const [medicineDropdownOpen, setMedicineDropdownOpen] = useState(false)
   const [quantity, setQuantity] = useState(1)
-  const [saleReference, setSaleReference] = useState(createSaleReference())
+  const [saleId, setSaleId] = useState(createSaleId)
+  const [saleReference, setSaleReference] = useState(() => createSaleReference(saleId))
   const [lines, setLines] = useState([])
   const [receipt, setReceipt] = useState(null)
   const [status, setStatus] = useState('idle')
@@ -149,13 +152,15 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
       if (!hasLatestStock) return
 
       const result = await completeSale({
-        saleId: crypto.randomUUID(),
+        saleId,
         saleReference,
         items: lines,
       })
       setReceipt(result)
       setLines([])
-      setSaleReference(createSaleReference())
+      const nextSaleId = createSaleId()
+      setSaleId(nextSaleId)
+      setSaleReference(createSaleReference(nextSaleId))
       setMessage('Sale completed and stock updated.')
       await onCompleted?.()
     } catch (error) {

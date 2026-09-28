@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MedicineSearch from '../../catalogue/components/MedicineSearch'
-import { createSale, getSaleReceipt, searchSaleItems } from '../api/salesApi'
+import { createSale, searchSaleItems } from '../api/salesApi'
 import ReceiptCard from '../components/ReceiptCard'
 
 const newKey = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`
@@ -74,14 +74,7 @@ export default function SalesPage() {
    setReceiptNames(medicineNames)
    setCart([])
    setRequestKey(newKey)
-   try {
-    setReceipt(await getSaleReceipt(response.saleId))
-   } catch {
-    setReceipt(response.receipt || null)
-    setReceiptError(response.receipt
-     ? 'Sale completed. The saved receipt could not be refreshed, so the receipt shown is from the completed sale.'
-     : 'Sale completed, but the receipt could not be loaded. Please try again from the sale record.')
-   }
+   setReceipt(response.receipt || null)
   } catch (requestError) {
    setError(requestError.message || 'The sale could not be completed. No stock was deducted.')
   } finally { setSubmitting(false) }

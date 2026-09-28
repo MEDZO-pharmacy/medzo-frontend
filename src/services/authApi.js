@@ -34,7 +34,7 @@ const request = async (path, options = {}) => {
   const data = contentType.includes('application/json') ? await response.json() : null
   if (!response.ok) {
     throw new ApiError(
-      data?.message || data?.title || 'The request could not be completed.',
+      data?.message || data?.detail || data?.title || 'The request could not be completed.',
       response.status,
       data?.errors || {},
       data || {},
