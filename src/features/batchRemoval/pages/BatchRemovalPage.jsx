@@ -73,7 +73,7 @@ export default function BatchRemovalPage() {
 
   return <main className="min-h-screen bg-[#f4f8ff] px-4 py-8 sm:px-6 sm:py-10"><div className="mx-auto max-w-7xl">
     <PageBackLink fallback="/inventory">Back to inventory</PageBackLink>
-    <header className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-sm font-bold uppercase tracking-wider text-medzo-green">Inventory safety</p><h1 className="mt-2 text-2xl font-bold text-[#0a192f] sm:text-3xl">Remove expired stock</h1><p className="mt-2 max-w-2xl text-[#4a5568]">Dispose of expired or near-expiry batches safely. Every removal creates an audit record and keeps past receipts intact.</p></div><div className="rounded-2xl bg-amber-50 px-5 py-3 text-amber-900"><span className="text-2xl font-bold">{data.totalCount}</span> <span className="font-semibold">eligible batches</span></div></header>
+    <header className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><h1 className="mt-2 text-2xl font-bold text-[#0a192f] sm:text-3xl">Remove expired stock</h1></div><div className="rounded-2xl bg-amber-50 px-5 py-3 text-amber-900"><span className="text-2xl font-bold">{data.totalCount}</span> <span className="font-semibold">eligible batches</span></div></header>
 
     {notice && <div role="status" className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-900"><ShieldCheck className="mr-2 inline" size={18} />{notice}</div>}
     {error && <div role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800"><p>{error}</p><button type="button" onClick={load} className="mt-2 font-semibold underline">Try again</button></div>}
@@ -93,3 +93,4 @@ export default function BatchRemovalPage() {
     </div>
   </div></main>
 }
+
