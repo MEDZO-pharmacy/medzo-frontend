@@ -14,7 +14,7 @@ export default function InventoryWorkspaceLayout() {
     { to: '/inventory/low-stock', label: 'Low stock', icon: AlertTriangle, tone: 'danger' },
     { to: '/inventory/near-expiry', label: 'Near expiry', icon: ShieldAlert, tone: 'warning' },
     { to: '/inventory/batch-removals', label: 'Remove stock', icon: AlertTriangle, tone: 'danger' },
-    { to: '/inventory/batches/new', label: 'Record batch', icon: PackagePlus },
+    { to: '/inventory/batches/new', label: 'Record batch', icon: PackagePlus, primary: true },
   ]
   return <div className="grid min-h-screen bg-[#f7faff] lg:grid-cols-[17.5rem_minmax(0,1fr)]"><MinimalDashboardSidebar user={user} roleLabel="Inventory Manager" items={items} /><div className="min-w-0"><Outlet /></div></div>
 }
