@@ -3,11 +3,11 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - main
+      - Dev
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - main
+      - Dev
 
 env:
   VITE_SALES_API_URL: ${{ vars.VITE_SALES_API_URL }}
@@ -22,11 +22,6 @@ jobs:
         with:
           submodules: true
           lfs: false
-      - name: Validate Sales API configuration
-        shell: bash
-        run: |
-          set -euo pipefail
-          : "${VITE_SALES_API_URL:?Add Actions variable VITE_SALES_API_URL with the Sales Container App HTTPS URL}"
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
