@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import PageBackLink from '../../../components/PageBackLink'
 import LowStockTable from '../components/LowStockTable'
 import { getLowStock } from '../api/inventoryApi'
 
@@ -46,7 +45,6 @@ export default function LowStockPage() {
   return (
     <main className="min-w-0 bg-transparent px-5 py-7 sm:px-8 lg:px-10">
       <div className="w-full max-w-none">
-        <PageBackLink fallback="/inventory">Back to inventory</PageBackLink>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-[#0a192f] sm:text-3xl">Low-stock medicines</h1>

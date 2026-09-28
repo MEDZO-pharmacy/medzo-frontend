@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../../auth/AuthContext'
-import PageBackLink from '../../../components/PageBackLink'
-import { getRoleHome } from '../../../auth/roleRouting'
 import MedicineSearch from '../components/MedicineSearch'
 import MedicineTable from '../components/MedicineTable'
 import { deleteMedicine, searchMedicines } from '../api/catalogueApi'
@@ -79,7 +77,6 @@ export default function CataloguePage() {
   return (
     <main className="min-w-0 bg-transparent px-5 py-7 sm:px-8 lg:px-10">
       <div className="w-full max-w-none">
-        <PageBackLink fallback={getRoleHome(user)}>Back to dashboard</PageBackLink>
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-[#0a192f] sm:text-3xl">Medicine Catalogue</h1>
