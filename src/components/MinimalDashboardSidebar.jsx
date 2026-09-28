@@ -5,7 +5,7 @@ export default function MinimalDashboardSidebar({ user, roleLabel, items }) {
   const location = useLocation()
   return (
     <aside className="flex min-h-screen flex-col border-r border-slate-200 bg-white px-4 py-6 sm:px-5 lg:sticky lg:top-0 lg:h-screen lg:self-start" aria-label={`${roleLabel} navigation`}>
-      <Link to="/" className="flex items-center gap-3 px-2 text-medzo-blue"><img src="/hospital-icon1.svg" alt="Medzo" className="h-10 w-10" /><span><span className="block text-2xl font-bold leading-none">Medzo</span><span className="mt-1 block text-xs font-medium text-slate-500">{roleLabel}</span></span></Link>
+      <Link to="/" aria-label="Back to home" className="flex items-center gap-3 px-2 text-medzo-blue"><img src="/hospital-icon1.svg" alt="Medzo" className="h-10 w-10" /><span><span className="block text-2xl font-bold leading-none">Medzo</span><span className="mt-1 block text-xs font-medium text-slate-500">{roleLabel}</span></span></Link>
       <nav className="mt-10 grid gap-2" aria-label="Dashboard actions">
         {items.map(({ to, label, icon: Icon, badge, primary = false }) => {
           const active = location.pathname === to
