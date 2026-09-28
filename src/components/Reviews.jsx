@@ -199,7 +199,7 @@ const Reviews = () => {
               {/* Name Input */}
               <div>
                 <label className="block text-sm font-semibold text-[#0a192f] mb-1">
-                  Full Name
+                  Full Name <span className="text-red-600" aria-hidden="true">*</span>
                 </label>
                 <input
                   type="text"
@@ -249,7 +249,7 @@ const Reviews = () => {
               {/* Review Text Area */}
               <div>
                 <label className="block text-sm font-semibold text-[#0a192f] mb-1">
-                  Your Review
+                  Your Review <span className="text-red-600" aria-hidden="true">*</span>
                 </label>
                 <textarea
                   required

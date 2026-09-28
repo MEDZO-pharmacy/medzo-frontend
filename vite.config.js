@@ -25,6 +25,11 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/sales-api/, ''),
         },
       },
+      '/sales-api': {
+        target: 'http://localhost:5227',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/sales-api/, ''),
+      },
     },
     test: {
       environment: 'jsdom',

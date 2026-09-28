@@ -48,11 +48,11 @@ const Contact = () => {
         <form onSubmit={submit} className="rounded-3xl bg-white p-8 shadow-sm space-y-5" noValidate>
           {status.message && <div role="status" className={`rounded-lg p-3 ${status.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>{status.message}</div>}
           <div className="grid gap-5 sm:grid-cols-2">
-            <label className="text-sm font-semibold">Name<input required name="name" value={form.name} onChange={change} className="mt-2 w-full rounded-lg border border-gray-200 p-3" /></label>
-            <label className="text-sm font-semibold">Email<input required type="email" name="email" value={form.email} onChange={change} className="mt-2 w-full rounded-lg border border-gray-200 p-3" /></label>
+            <label className="text-sm font-semibold">Name <span className="text-red-600" aria-hidden="true">*</span><input required name="name" value={form.name} onChange={change} className="mt-2 w-full rounded-lg border border-gray-200 p-3" /></label>
+            <label className="text-sm font-semibold">Email <span className="text-red-600" aria-hidden="true">*</span><input required type="email" name="email" value={form.email} onChange={change} className="mt-2 w-full rounded-lg border border-gray-200 p-3" /></label>
           </div>
-          <label className="block text-sm font-semibold">Subject<input required name="subject" value={form.subject} onChange={change} className="mt-2 w-full rounded-lg border border-gray-200 p-3" /></label>
-          <label className="block text-sm font-semibold">Message<textarea required minLength={10} rows={6} name="message" value={form.message} onChange={change} className="mt-2 w-full resize-none rounded-lg border border-gray-200 p-3" /></label>
+          <label className="block text-sm font-semibold">Subject <span className="text-red-600" aria-hidden="true">*</span><input required name="subject" value={form.subject} onChange={change} className="mt-2 w-full rounded-lg border border-gray-200 p-3" /></label>
+          <label className="block text-sm font-semibold">Message <span className="text-red-600" aria-hidden="true">*</span><textarea required minLength={10} rows={6} name="message" value={form.message} onChange={change} className="mt-2 w-full resize-none rounded-lg border border-gray-200 p-3" /></label>
           <button type="submit" disabled={isSubmitting} className="gradient-btn rounded-lg px-7 py-3 font-bold text-white disabled:opacity-60">{isSubmitting ? 'Sending…' : 'Send Message'}</button>
         </form>
       </div>
