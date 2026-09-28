@@ -34,7 +34,7 @@ const request = async (path, options = {}) => {
   const data = contentType.includes('application/json') ? await response.json() : null
   if (!response.ok) {
     throw new ApiError(
-      data?.message || data?.title || 'The request could not be completed.',
+      data?.message || data?.detail || data?.title || 'The request could not be completed.',
       response.status,
       data?.errors || {},
       data || {},
@@ -105,6 +105,12 @@ export const authenticatedRequest = async (path, options = {}) => {
 }
 
 export const authenticatedServiceRequest = async (baseUrl, path, options = {}) => {
+  // Relative paths work only through Vite's development proxy. Azure Static
+  // Web Apps otherwise returns the SPA document instead of API JSON.
+  if (import.meta.env.PROD && (!baseUrl || baseUrl.startsWith('/'))) {
+    throw new ApiError('The Catalogue and Inventory service has not been deployed or configured yet.', 503)
+  }
+
   if (!accessToken || (accessTokenExpiresAt && accessTokenExpiresAt <= Date.now() + 30_000)) await refreshSession()
   const send = async () => {
     let response
@@ -119,9 +125,15 @@ export const authenticatedServiceRequest = async (baseUrl, path, options = {}) =
     const data = response.status === 204 ? null : await response.json().catch(() => null)
     if (!response.ok) {
       const fallback = response.status >= 500
-        ? `Catalogue and Inventory API is unavailable (HTTP ${response.status}). Confirm the API is running on port 5000.`
+        ? `The Catalogue and Inventory service could not load this data (HTTP ${response.status}). Please retry in a moment; if it continues, contact your system administrator.`
         : `The request could not be completed (HTTP ${response.status}).`
-      throw new ApiError(data?.detail || data?.title || fallback, response.status, data?.errors || {}, data || {})
+      const safeServerMessage = response.status >= 500 && data?.title === 'An unexpected error occurred.'
+        ? fallback
+        : data?.detail || data?.title || fallback
+      throw new ApiError(safeServerMessage, response.status, data?.errors || {}, data || {})
+    }
+    if (data == null) {
+      throw new ApiError('The Catalogue and Inventory service returned an invalid response. Please try again.', response.status)
     }
     return data
   }

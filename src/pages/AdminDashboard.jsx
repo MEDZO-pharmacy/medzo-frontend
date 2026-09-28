@@ -173,7 +173,7 @@ const AdminDashboard = () => {
 
   const input = (name, label, type = 'text') => (
     <label className="text-sm font-semibold text-[#0a192f]">{label} <span className="text-red-600" aria-hidden="true">*</span>
-      <input required type={type} name={name} value={userForm[name]} onChange={changeUser} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal" />
+      <input required type={type} name={name} value={userForm[name]} onChange={changeUser} aria-label={label} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal" />
     </label>
   )
 
@@ -210,7 +210,7 @@ const AdminDashboard = () => {
               {input('firstName', 'First name')}{input('lastName', 'Last name')}
               {input('username', 'Username')}{input('email', 'Email', 'email')}
               {input('staffId', `Staff ID (${rolePrefix[userForm.role]} prefix)`)}
-              <label className="text-sm font-semibold">Role <span className="text-red-600" aria-hidden="true">*</span><select name="role" value={userForm.role} onChange={changeUser} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal"><option>Pharmacist</option><option value="InventoryManager">Inventory Manager</option></select></label>
+              <label className="text-sm font-semibold">Role <span className="text-red-600" aria-hidden="true">*</span><select name="role" value={userForm.role} onChange={changeUser} aria-label="Role" className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal"><option>Pharmacist</option><option value="InventoryManager">Inventory Manager</option></select></label>
               {input('password', 'Temporary password', 'password')}{input('confirmPassword', 'Confirm password', 'password')}
             </div>
             {duplicateWarning && <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"><p>{duplicateWarning.duplicates?.map((item) => `${item.firstName} ${item.lastName} (${item.staffId || item.username})`).join(', ')}</p><button type="button" disabled={busy} onClick={() => submitUser(null, true)} className="mt-3 rounded-lg bg-amber-700 px-4 py-2 font-bold text-white">Create anyway</button></div>}
@@ -238,8 +238,8 @@ const AdminDashboard = () => {
             <button type="button" aria-label="Cancel editing" onClick={() => setEditingUser(null)}><X /></button>
           </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {['firstName', 'lastName', 'username', 'email', 'staffId'].map((name) => <label key={name} className="text-sm font-semibold">{{ firstName: 'First name', lastName: 'Last name', username: 'Username', email: 'Email', staffId: 'Staff ID' }[name]} <span className="text-red-600" aria-hidden="true">*</span><input required name={name} type={name === 'email' ? 'email' : 'text'} value={editingUser[name]} onChange={changeEdit} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal" /></label>)}
-            <label className="text-sm font-semibold">Role <span className="text-red-600" aria-hidden="true">*</span><select name="role" value={editingUser.role} onChange={changeEdit} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal"><option>Pharmacist</option><option value="InventoryManager">Inventory Manager</option></select></label>
+            {['firstName', 'lastName', 'username', 'email', 'staffId'].map((name) => { const label = { firstName: 'First name', lastName: 'Last name', username: 'Username', email: 'Email', staffId: 'Staff ID' }[name]; return <label key={name} className="text-sm font-semibold">{label} <span className="text-red-600" aria-hidden="true">*</span><input required name={name} type={name === 'email' ? 'email' : 'text'} value={editingUser[name]} onChange={changeEdit} aria-label={label} className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal" /></label> })}
+            <label className="text-sm font-semibold">Role <span className="text-red-600" aria-hidden="true">*</span><select name="role" value={editingUser.role} onChange={changeEdit} aria-label="Role" className="mt-1 w-full rounded-lg border border-slate-200 p-3 font-normal"><option>Pharmacist</option><option value="InventoryManager">Inventory Manager</option></select></label>
           </div>
           <div className="mt-5 flex gap-3">
             <button disabled={busy} className="gradient-btn rounded-lg px-6 py-3 font-bold text-white disabled:opacity-60">Save changes</button>
