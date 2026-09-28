@@ -44,8 +44,8 @@ export default function LowStockPage() {
   const totalPages = Math.max(1, Math.ceil(data.totalCount / data.pageSize))
 
   return (
-    <main className="min-h-screen bg-[#f4f8ff] px-4 py-8 sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-w-0 bg-transparent px-5 py-7 sm:px-8 lg:px-10">
+      <div className="w-full max-w-none">
         <PageBackLink fallback="/inventory">Back to inventory</PageBackLink>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>

@@ -71,7 +71,7 @@ export default function BatchRemovalPage() {
     }
   }
 
-  return <main className="min-h-screen bg-[#f4f8ff] px-4 py-8 sm:px-6 sm:py-10"><div className="mx-auto max-w-7xl">
+  return <main className="min-w-0 bg-transparent px-5 py-7 sm:px-8 lg:px-10"><div className="w-full max-w-none">
     <PageBackLink fallback="/inventory">Back to inventory</PageBackLink>
     <header className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><h1 className="mt-2 text-2xl font-bold text-[#0a192f] sm:text-3xl">Remove expired stock</h1></div><div className="rounded-2xl bg-amber-50 px-5 py-3 text-amber-900"><span className="text-2xl font-bold">{data.totalCount}</span> <span className="font-semibold">eligible batches</span></div></header>
 

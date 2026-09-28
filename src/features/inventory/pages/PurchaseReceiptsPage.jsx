@@ -22,8 +22,8 @@ export default function PurchaseReceiptsPage() {
       .catch(requestError => { setError(requestError.message || 'Purchase updates could not be loaded.'); setStatus('error') })
   }, [])
 
-  return <main className="min-h-screen bg-[#f4f8ff] px-4 py-8 sm:px-6 sm:py-10">
-    <div className="mx-auto max-w-7xl">
+  return <main className="min-w-0 bg-transparent px-5 py-7 sm:px-8 lg:px-10">
+    <div className="w-full max-w-none">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <PageBackLink fallback="/inventory">Back to inventory</PageBackLink>
