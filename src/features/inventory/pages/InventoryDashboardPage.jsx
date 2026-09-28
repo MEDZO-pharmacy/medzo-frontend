@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import DashboardLogoutButton from '../../../components/DashboardLogoutButton'
+import Header from '../../../components/Header'
 import { useAuth } from '../../../auth/AuthContext'
 import InventoryTable from '../components/InventoryTable'
 import StockLevelCard from '../components/StockLevelCard'
@@ -32,11 +32,12 @@ export default function InventoryDashboardPage() {
   const navLinkClass = 'rounded-lg border border-medzo-blue bg-white px-4 py-3 text-center font-semibold text-medzo-blue transition-colors hover:bg-blue-50'
 
   return (
-    <main className="min-h-screen bg-[#f4f8ff] px-4 py-8 sm:px-6 sm:py-10">
+    <>
+      <Header />
+      <main className="min-h-screen bg-[#f4f8ff] px-4 py-8 sm:px-6 sm:py-10">
       <div className={`mx-auto max-w-7xl ${canManage ? 'grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start' : ''}`}>
         {canManage && (
           <aside className="rounded-2xl bg-white p-4 shadow-sm lg:sticky lg:top-6" aria-label="Inventory navigation">
-            <Link to="/" className="mb-5 inline-block font-semibold text-medzo-blue">Back to home</Link>
             <nav className="grid gap-3" aria-label="Inventory quick actions">
               <Link to="/catalogue" className={navLinkClass}>Manage medicines</Link>
               <Link to="/inventory/sale-issues" className={navLinkClass}>Sales history</Link>
@@ -45,7 +46,6 @@ export default function InventoryDashboardPage() {
               <Link to="/inventory/near-expiry" className="rounded-lg border border-amber-500 bg-white px-4 py-3 text-center font-semibold text-amber-800 transition-colors hover:bg-amber-50">Near expiry</Link>
               <Link to="/inventory/batch-removals" className="rounded-lg border border-red-300 bg-white px-4 py-3 text-center font-semibold text-red-700 transition-colors hover:bg-red-50">Remove stock</Link>
               <Link to="/inventory/batches/new" className={navLinkClass}>Record batch</Link>
-              <DashboardLogoutButton />
             </nav>
           </aside>
         )}
@@ -68,6 +68,7 @@ export default function InventoryDashboardPage() {
           {!loading && !error && <InventoryTable items={data.items} canEditInventory={canEditInventory} />}
         </div>
       </div>
-    </main>
+      </main>
+    </>
   )
 }
