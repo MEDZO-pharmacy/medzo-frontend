@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import MedicineSearch from '../../catalogue/components/MedicineSearch'
 import { createSale, searchSaleItems } from '../api/salesApi'
 import ReceiptCard from '../components/ReceiptCard'
@@ -81,8 +80,7 @@ export default function SalesPage() {
  }
 
  return <main className="min-h-screen bg-medzo-light-bg px-4 py-8 sm:px-6 sm:py-10"><div className="mx-auto max-w-4xl">
-  <Link to="/pharmacist" className="font-semibold text-medzo-blue">Back to dashboard</Link>
-  <h1 className="mt-4 text-3xl font-bold text-[#0a192f]">Complete sale</h1>
+  <h1 className="text-3xl font-bold text-[#0a192f]">Complete sale</h1>
   <p className="mt-2 text-medzo-text-light">Search for medicines, add them to the sale, and let the backend allocate the earliest-expiring eligible batches.</p>
   {error && <p role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{error}</p>}
   <div className="mt-6"><MedicineSearch value={query} onChange={setQuery} onSubmit={event => { event.preventDefault(); loadMedicines(query) }} onClear={clearSearch} busy={status === 'loading' || submitting} /></div>

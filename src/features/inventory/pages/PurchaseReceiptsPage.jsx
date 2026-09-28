@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import PageBackLink from '../../../components/PageBackLink'
 import PurchaseReceiptTable from '../components/PurchaseReceiptTable'
 import { getPurchaseReceipts } from '../api/inventoryApi'
 
@@ -22,11 +21,10 @@ export default function PurchaseReceiptsPage() {
       .catch(requestError => { setError(requestError.message || 'Purchase updates could not be loaded.'); setStatus('error') })
   }, [])
 
-  return <main className="min-h-screen bg-[#f4f8ff] px-4 py-8 sm:px-6 sm:py-10">
-    <div className="mx-auto max-w-7xl">
+  return <main className="min-w-0 bg-transparent px-5 py-7 sm:px-8 lg:px-10">
+    <div className="w-full max-w-none">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <PageBackLink fallback="/inventory">Back to inventory</PageBackLink>
           <h1 className="text-2xl font-bold text-[#0a192f] sm:text-3xl">Purchase stock updates</h1>
           <p className="mt-2 text-[#4a5568]">Purchase receipts applied automatically from the Purchasing/Supplier service.</p>
         </div>

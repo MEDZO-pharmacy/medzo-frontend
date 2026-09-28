@@ -54,9 +54,9 @@ describe('authentication UI', () => {
   })
 
   it.each([
-    ['Pharmacist', '/pharmacist', 'Pharmacist Dashboard'],
-    ['InventoryManager', '/inventory', 'Inventory Manager Dashboard'],
-  ])('shows a back-to-home arrow on the %s dashboard', async (role, path, heading) => {
+    ['Pharmacist', '/pharmacist', 'Pharmacist overview'],
+    ['InventoryManager', '/inventory', 'Inventory overview'],
+  ])('shows the Medzo navigation and account controls on the %s dashboard', async (role, path, heading) => {
     const roleSession = { ...session, user: { ...session.user, roles: [role] } }
     vi.stubGlobal('fetch', vi.fn(async (url) => {
       if (url.endsWith('/auth/refresh')) return jsonResponse(roleSession)

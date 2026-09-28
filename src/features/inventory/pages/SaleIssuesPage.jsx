@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import PageBackLink from '../../../components/PageBackLink'
 import SaleIssueTable from '../components/SaleIssueTable'
 import { getSaleIssues } from '../api/inventoryApi'
 
@@ -26,7 +25,6 @@ export default function SaleIssuesPage() {
     <div className="mx-auto max-w-7xl">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <PageBackLink fallback="/inventory">Back to inventory</PageBackLink>
           <h1 className="text-2xl font-bold text-[#0a192f] sm:text-3xl">Sale stock updates</h1>
           <p className="mt-2 text-[#4a5568]">Stock deducted automatically from the earliest-expiring sellable batches.</p>
         </div>

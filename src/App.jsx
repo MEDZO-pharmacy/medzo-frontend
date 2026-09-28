@@ -17,6 +17,7 @@ import CataloguePage from './features/catalogue/pages/CataloguePage'
 import AddMedicinePage from './features/catalogue/pages/AddMedicinePage'
 import EditMedicinePage from './features/catalogue/pages/EditMedicinePage'
 import InventoryDashboardPage from './features/inventory/pages/InventoryDashboardPage'
+import InventoryWorkspaceLayout from './components/InventoryWorkspaceLayout'
 import RecordBatchPage from './features/inventory/pages/RecordBatchPage'
 import LowStockPage from './features/inventory/pages/LowStockPage'
 import NearExpiryAlertsPage from './features/expiry/pages/NearExpiryAlertsPage'
@@ -54,25 +55,26 @@ function App() {
             <Route element={<ProtectedRoute roles={['Pharmacist']} />}>
               <Route path="/pharmacist" element={<PharmacistDashboard />} />
               <Route path="/sales" element={<SalesPage />} />
-              <Route path="/pharmacist/sales-history" element={<PharmacistSalesHistoryPage />} />
+              <Route element={<InventoryWorkspaceLayout />}>
+                <Route path="/pharmacist/sales-history" element={<PharmacistSalesHistoryPage />} />
+              </Route>
             </Route>
             <Route element={<ProtectedRoute roles={['Pharmacist', 'InventoryManager', 'Admin']} />}>
-              <Route path="/catalogue" element={<CataloguePage />} />
-              <Route path="/inventory" element={<InventoryDashboardPage />} />
-
-            </Route>
-            <Route element={<ProtectedRoute roles={['InventoryManager', 'Admin']} />}>
-              <Route path="/catalogue/new" element={<AddMedicinePage />} />
-              <Route path="/catalogue/:medicineId/edit" element={<EditMedicinePage />} />
-              <Route path="/inventory/low-stock" element={<LowStockPage />} />
-              <Route path="/inventory/batches/new" element={<RecordBatchPage />} />
-              <Route path="/inventory/near-expiry" element={<NearExpiryAlertsPage />} />
-              <Route path="/inventory/batch-removals" element={<BatchRemovalPage />} />
-              <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
-              <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
-
-            </Route>
-            <Route element={<ProtectedRoute roles={['Admin']} />}>
+              <Route element={<InventoryWorkspaceLayout />}>
+                <Route path="/catalogue" element={<CataloguePage />} />
+                <Route path="/inventory" element={<InventoryDashboardPage />} />
+                <Route element={<ProtectedRoute roles={['InventoryManager', 'Admin']} />}>
+                  <Route path="/catalogue/new" element={<AddMedicinePage />} />
+                  <Route path="/catalogue/:medicineId/edit" element={<EditMedicinePage />} />
+                  <Route path="/inventory/low-stock" element={<LowStockPage />} />
+                  <Route path="/inventory/batches/new" element={<RecordBatchPage />} />
+                  <Route path="/inventory/near-expiry" element={<NearExpiryAlertsPage />} />
+                  <Route path="/inventory/batch-removals" element={<BatchRemovalPage />} />
+                  <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
+                  <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
+                </Route>
+              </Route>
+            </Route>            <Route element={<ProtectedRoute roles={['Admin']} />}>
               <Route path="/admin" element={<AdminDashboard />} />
             </Route>
             <Route path="/login" element={<Login />} />
