@@ -7,3 +7,5 @@ export const getBatches=({medicineId='',page=1,pageSize=20}={})=>authenticatedSe
 export const getMovements=medicineId=>authenticatedServiceRequest(base,`/api/inventory/items/${medicineId}/movements`)
 export const getPurchaseReceipts=({page=1,pageSize=20}={})=>authenticatedServiceRequest(base,`/api/inventory/purchase-receipts?page=${page}&pageSize=${pageSize}`)
 export const getSaleIssues=({page=1,pageSize=20}={})=>authenticatedServiceRequest(base,`/api/inventory/sale-issues?page=${page}&pageSize=${pageSize}`)
+
+export const getSaleReceipt=saleReference=>authenticatedServiceRequest(base,`/api/inventory/sales/${encodeURIComponent(saleReference)}/receipt`)

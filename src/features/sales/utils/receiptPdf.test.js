@@ -7,6 +7,7 @@ describe('receiptPdf', () => {
       saleId: 'sale-1',
       saleReference: 'SALE-20260927073333',
       completedAtUtc: '2026-09-27T07:37:52Z',
+      pharmacistUsername: 'pharmacist.lee',
       items: [{
         medicineId: 'medicine-1',
         medicineName: 'Amoxicillin 250mg',
@@ -19,6 +20,8 @@ describe('receiptPdf', () => {
     const content = await blob.text()
     expect(content.startsWith('%PDF-1.4')).toBe(true)
     expect(content).toContain('SALE-20260927073333')
+    expect(content).toContain('Pharmacist')
+    expect(content).toContain('pharmacist.lee')
     expect(content).toContain('Amoxicillin 250mg')
     expect(content).toContain('DEMO-AMOX-001: 1')
   })

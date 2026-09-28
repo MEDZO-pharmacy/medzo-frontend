@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Download, History, RefreshCw } from 'lucide-react'
-import { getSaleIssues } from '../../inventory/api/inventoryApi'
+import { getSaleIssues, getSaleReceipt } from '../../inventory/api/inventoryApi'
 import { downloadReceiptPdf } from '../utils/receiptPdf'
 
 const groupSaleIssues = (items) => {
@@ -46,6 +46,8 @@ export default function SalesHistoryPanel({ refreshKey = 0 }) {
   const [data, setData] = useState({ items: [] })
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState('')
+  const [receiptError, setReceiptError] = useState('')
+  const [downloadingReference, setDownloadingReference] = useState('')
 
   const applyResult = useCallback((request) => {
     request
@@ -71,6 +73,19 @@ export default function SalesHistoryPanel({ refreshKey = 0 }) {
 
   const sales = useMemo(() => groupSaleIssues(data.items || []), [data.items])
 
+  const downloadSaleReceipt = async (sale) => {
+    setReceiptError('')
+    setDownloadingReference(sale.saleReference)
+    try {
+      const receipt = await getSaleReceipt(sale.saleReference)
+      downloadReceiptPdf(receipt)
+    } catch (requestError) {
+      setReceiptError(requestError.message || 'The saved receipt could not be loaded from the database. Please try again.')
+    } finally {
+      setDownloadingReference('')
+    }
+  }
+
   return (
     <section className="mt-6 rounded-2xl bg-white p-4 shadow-sm sm:p-6" aria-labelledby="sales-history-title">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -88,6 +103,7 @@ export default function SalesHistoryPanel({ refreshKey = 0 }) {
 
       {status === 'loading' && <p role="status" className="mt-5 rounded-lg bg-slate-50 p-5 text-center text-medzo-text-light">Loading sales history...</p>}
       {status === 'error' && <div role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700"><p>{error}</p><button type="button" onClick={load} className="mt-3 font-semibold underline">Try again</button></div>}
+      {receiptError && <div role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{receiptError}</div>}
       {status === 'ready' && sales.length === 0 && <p className="mt-5 rounded-lg bg-slate-50 p-5 text-center text-medzo-text-light">No completed sales have been recorded yet.</p>}
 
       {status === 'ready' && sales.length > 0 && (
@@ -118,8 +134,8 @@ export default function SalesHistoryPanel({ refreshKey = 0 }) {
                   </td>
                   <td className="p-3 font-semibold">{sale.totalUnits}</td>
                   <td className="p-3">
-                    <button type="button" onClick={() => downloadReceiptPdf(sale)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-medzo-blue px-3 py-2 font-semibold text-medzo-blue hover:bg-blue-50">
-                      <Download size={16} aria-hidden="true" /> PDF
+                    <button type="button" onClick={() => downloadSaleReceipt(sale)} disabled={downloadingReference === sale.saleReference} className="inline-flex items-center justify-center gap-2 rounded-lg border border-medzo-blue px-3 py-2 font-semibold text-medzo-blue hover:bg-blue-50">
+                      <Download size={16} aria-hidden="true" /> {downloadingReference === sale.saleReference ? 'Loading...' : 'PDF'}
                     </button>
                   </td>
                 </tr>

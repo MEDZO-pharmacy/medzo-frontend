@@ -6,22 +6,19 @@ import { downloadReceiptPdf } from '../utils/receiptPdf'
 import ExpiredStockWarning from './ExpiredStockWarning'
 
 
-const createSaleId = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`
-
-const createSaleReference = (saleId) => {
+const createSaleReference = () => {
   const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14)
-  return `SALE-${stamp}-${saleId.slice(0, 8)}`
+  return `SALE-${stamp}`
 }
 
 const money = (value) => `Rs. ${Number(value || 0).toFixed(2)}`
 
-export default function SaleWorkspace({ medicines = [], inventory = [], onCompleted }) {
+export default function SaleWorkspace({ medicines = [], inventory = [], onCompleted, pharmacistUsername }) {
   const [selectedMedicineId, setSelectedMedicineId] = useState('')
   const [medicineQuery, setMedicineQuery] = useState('')
   const [medicineDropdownOpen, setMedicineDropdownOpen] = useState(false)
   const [quantity, setQuantity] = useState(1)
-  const [saleId, setSaleId] = useState(createSaleId)
-  const [saleReference, setSaleReference] = useState(() => createSaleReference(saleId))
+  const [saleReference, setSaleReference] = useState(createSaleReference())
   const [lines, setLines] = useState([])
   const [receipt, setReceipt] = useState(null)
   const [status, setStatus] = useState('idle')
@@ -152,15 +149,14 @@ export default function SaleWorkspace({ medicines = [], inventory = [], onComple
       if (!hasLatestStock) return
 
       const result = await completeSale({
-        saleId,
+        saleId: crypto.randomUUID(),
         saleReference,
         items: lines,
+        pharmacistUsername,
       })
-      setReceipt(result)
+      setReceipt({ ...result, pharmacistUsername: result.pharmacistUsername || pharmacistUsername || 'Not recorded' })
       setLines([])
-      const nextSaleId = createSaleId()
-      setSaleId(nextSaleId)
-      setSaleReference(createSaleReference(nextSaleId))
+      setSaleReference(createSaleReference())
       setMessage('Sale completed and stock updated.')
       await onCompleted?.()
     } catch (error) {
