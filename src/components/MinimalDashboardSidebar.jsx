@@ -9,7 +9,7 @@ export default function MinimalDashboardSidebar({ user, roleLabel, items }) {
       <nav className="mt-10 grid gap-2" aria-label="Dashboard actions">
         {items.map(({ to, label, icon: Icon, badge, primary = false }) => {
           const active = location.pathname === to
-          if (primary) return <Link key={to} to={to} className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-teal-500 to-blue-600 px-3 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"><Icon size={20} aria-hidden="true" /><span className="flex-1">{label}</span></Link>
+          if (primary) return <Link key={to} to={to} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-medzo-blue transition hover:bg-blue-50"><Icon size={20} aria-hidden="true" /><span className="flex-1">{label}</span></Link>
           return <Link key={to} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${active ? 'bg-blue-50 text-medzo-blue ring-1 ring-blue-100' : 'text-medzo-blue hover:bg-blue-50'}`}><Icon size={20} aria-hidden="true" /><span className="flex-1">{label}</span>{badge != null && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-blue-100 px-1 text-xs font-bold text-medzo-blue">{badge}</span>}</Link>
         })}
       </nav>
