@@ -71,6 +71,22 @@ export default function SalesHistoryPanel({ refreshKey = 0 }) {
     applyResult(getSaleIssues({ pageSize: 50 }))
   }, [applyResult, refreshKey])
 
+  useEffect(() => {
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') load()
+    }
+
+    const interval = window.setInterval(load, 15_000)
+    window.addEventListener('focus', load)
+    document.addEventListener('visibilitychange', refreshWhenVisible)
+
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener('focus', load)
+      document.removeEventListener('visibilitychange', refreshWhenVisible)
+    }
+  }, [load])
+
   const sales = useMemo(() => groupSaleIssues(data.items || []), [data.items])
 
   const downloadSaleReceipt = async (sale) => {
