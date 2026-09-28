@@ -15,6 +15,7 @@ export default function MedicineForm({ initial = {}, onSubmit, onChange, busy = 
     name: '', genericName: '', manufacturer: '', unitPrice: '', dosageForm: 'Tablet', reorderThreshold: 0, ...initial,
   })
   const [errors, setErrors] = useState({})
+  const [hasSubmitted, setHasSubmitted] = useState(false)
 
   const change = (event) => {
     const { name, value } = event.target
@@ -26,6 +27,7 @@ export default function MedicineForm({ initial = {}, onSubmit, onChange, busy = 
   const submit = (event) => {
     event.preventDefault()
     const nextErrors = validateMedicine(values)
+    setHasSubmitted(true)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
     onSubmit({
@@ -38,7 +40,7 @@ export default function MedicineForm({ initial = {}, onSubmit, onChange, busy = 
 
   return (
     <form onSubmit={submit} noValidate className="rounded-2xl bg-white p-5 shadow-sm sm:p-7">
-      {Object.keys(errors).length > 0 && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">Please correct the highlighted fields before saving.</p>}
+      {hasSubmitted && Object.keys(errors).length > 0 && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">Please correct the highlighted fields before saving.</p>}
       <div className="grid gap-5 sm:grid-cols-2">
         {fields.map((field) => {
           const errorId = `${field.name}-error`
@@ -54,11 +56,11 @@ export default function MedicineForm({ initial = {}, onSubmit, onChange, busy = 
                 disabled={busy}
                 required
                 aria-label={label}
-                aria-invalid={Boolean(errors[field.name])}
-                aria-describedby={errors[field.name] ? errorId : undefined}
-                className={`mt-1 w-full rounded-lg border bg-[#f8fafc] p-3 font-normal outline-none transition focus:ring-2 focus:ring-medzo-blue/20 disabled:cursor-not-allowed disabled:opacity-60 ${errors[field.name] ? 'border-red-400' : 'border-slate-200 focus:border-medzo-blue'}`}
+                aria-invalid={hasSubmitted && Boolean(errors[field.name])}
+                aria-describedby={hasSubmitted && errors[field.name] ? errorId : undefined}
+                className={`mt-1 w-full rounded-lg border bg-[#f8fafc] p-3 font-normal outline-none transition focus:ring-2 focus:ring-medzo-blue/20 disabled:cursor-not-allowed disabled:opacity-60 ${hasSubmitted && errors[field.name] ? 'border-red-400' : 'border-slate-200 focus:border-medzo-blue'}`}
               />
-              {errors[field.name] && <span id={errorId} className="mt-1 block text-sm font-normal text-red-600">{errors[field.name]}</span>}
+              {hasSubmitted && errors[field.name] && <span id={errorId} className="mt-1 block text-sm font-normal text-red-600">{errors[field.name]}</span>}
             </label>
           )
         })}
@@ -74,3 +76,4 @@ export default function MedicineForm({ initial = {}, onSubmit, onChange, busy = 
     </form>
   )
 }
+
