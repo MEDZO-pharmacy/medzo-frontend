@@ -55,7 +55,9 @@ function App() {
             <Route element={<ProtectedRoute roles={['Pharmacist']} />}>
               <Route path="/pharmacist" element={<PharmacistDashboard />} />
               <Route path="/sales" element={<SalesPage />} />
-              <Route path="/pharmacist/sales-history" element={<PharmacistSalesHistoryPage />} />
+              <Route element={<InventoryWorkspaceLayout />}>
+                <Route path="/pharmacist/sales-history" element={<PharmacistSalesHistoryPage />} />
+              </Route>
             </Route>
             <Route element={<ProtectedRoute roles={['Pharmacist', 'InventoryManager', 'Admin']} />}>
               <Route element={<InventoryWorkspaceLayout />}>

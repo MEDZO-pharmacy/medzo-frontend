@@ -1,13 +1,12 @@
 import { Outlet } from 'react-router-dom'
-import { AlertTriangle, ClipboardList, PackagePlus, Pill, ShieldAlert, ShoppingBag } from 'lucide-react'
+import { AlertTriangle, ClipboardList, History, PackagePlus, Pill, ShieldAlert, ShoppingBag } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import MinimalDashboardSidebar from './MinimalDashboardSidebar'
 
 export default function InventoryWorkspaceLayout() {
   const { user } = useAuth()
   const canManage = user?.roles?.some((role) => ['Admin', 'InventoryManager'].includes(role))
-  if (!canManage) return <Outlet />
-  const items = [
+  const inventoryManagerItems = [
     { to: '/inventory', label: 'Inventory overview', icon: ShoppingBag },
     { to: '/catalogue', label: 'Medicines', icon: Pill },
     { to: '/inventory/purchase-receipts', label: 'Purchase updates', icon: ClipboardList },
@@ -16,5 +15,19 @@ export default function InventoryWorkspaceLayout() {
     { to: '/inventory/batch-removals', label: 'Remove stock', icon: AlertTriangle, tone: 'danger' },
     { to: '/inventory/batches/new', label: 'Record batch', icon: PackagePlus, primary: true },
   ]
-  return <div className="grid min-h-screen bg-[#f7faff] lg:grid-cols-[17.5rem_minmax(0,1fr)]"><MinimalDashboardSidebar user={user} roleLabel="Inventory Manager" items={items} /><div className="min-w-0"><Outlet /></div></div>
+  const pharmacistItems = [
+    { to: '/pharmacist', label: 'Sales workspace', icon: ShoppingBag },
+    { to: '/catalogue', label: 'Medicine catalogue', icon: Pill },
+    { to: '/inventory', label: 'Inventory', icon: ClipboardList },
+    { to: '/pharmacist/sales-history', label: 'Sales history', icon: History },
+  ]
+  const items = canManage ? inventoryManagerItems : pharmacistItems
+  const roleLabel = canManage ? 'Inventory Manager' : 'Pharmacist'
+
+  return (
+    <div className="grid min-h-screen bg-[#f7faff] lg:grid-cols-[17.5rem_minmax(0,1fr)]">
+      <MinimalDashboardSidebar user={user} roleLabel={roleLabel} items={items} />
+      <div className="min-w-0"><Outlet /></div>
+    </div>
+  )
 }
