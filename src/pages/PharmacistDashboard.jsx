@@ -7,7 +7,7 @@ import MedicineTable from '../features/catalogue/components/MedicineTable'
 import { getInventory } from '../features/inventory/api/inventoryApi'
 import StockLevelCard from '../features/inventory/components/StockLevelCard'
 import SaleWorkspace from '../features/sales/components/SaleWorkspace'
-import DashboardLogoutButton from '../components/DashboardLogoutButton'
+import Header from '../components/Header'
 
 export default function PharmacistDashboard() {
   const { user } = useAuth()
@@ -69,21 +69,20 @@ export default function PharmacistDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-medzo-light-bg px-4 py-8 sm:px-6 sm:py-10">
+    <>
+      <Header />
+      <main className="min-h-screen bg-medzo-light-bg px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start">
         <aside className="order-2 rounded-2xl bg-white p-4 shadow-sm lg:order-1 lg:sticky lg:top-6" aria-label="Pharmacist quick actions">
           <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <Link to="/catalogue" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Full catalogue</Link>
             <Link to="/inventory" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">View inventory</Link>
             <Link to="/pharmacist/sales-history" className="rounded-lg border border-medzo-blue bg-white px-5 py-3 text-center font-semibold text-medzo-blue hover:bg-blue-50">Sales history</Link>
-            <DashboardLogoutButton fullWidth />
           </nav>
         </aside>
 
         <div className="order-1 min-w-0 lg:order-2">
           <header>
-            <Link to="/" aria-label="Back to home" className="mb-3 inline-block font-semibold text-medzo-blue">Back to home</Link>
-            <p className="text-sm font-bold uppercase tracking-wider text-medzo-green">Pharmacy workspace</p>
             <h1 className="mt-2 text-2xl font-bold text-[#0a192f] sm:text-3xl">Pharmacist Dashboard</h1>
             <p className="mt-2 text-sm font-semibold text-medzo-blue"><span>Signed in as</span> <span>{user?.firstName || user?.username} · {user?.staffId}</span></p>
           </header>
@@ -116,7 +115,8 @@ export default function PharmacistDashboard() {
         </section>
         </div>
       </div>
-    </main>
+      </main>
+    </>
   )
 }
 
