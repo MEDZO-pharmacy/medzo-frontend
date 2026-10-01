@@ -19,6 +19,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/catalogue-inventory-api/, ''),
         },
+        '/purchasing-supplier-api': {
+          target: env.VITE_PURCHASING_SUPPLIER_SERVICE_TARGET || 'http://localhost:5090',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/purchasing-supplier-api/, ''),
+        },
         '/sales-api': {
           target: env.VITE_SALES_SERVICE_TARGET || 'http://localhost:5227',
           changeOrigin: true,

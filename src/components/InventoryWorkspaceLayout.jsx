@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { AlertTriangle, ClipboardList, History, PackagePlus, Pill, ShieldAlert, ShoppingBag } from 'lucide-react'
+import { AlertTriangle, ClipboardList, History, PackagePlus, Pill, ShieldAlert, ShoppingBag, Truck } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import MinimalDashboardSidebar from './MinimalDashboardSidebar'
 
@@ -14,6 +14,7 @@ export default function InventoryWorkspaceLayout() {
     { to: '/inventory/near-expiry', label: 'Near expiry', icon: ShieldAlert, tone: 'warning' },
     { to: '/inventory/batch-removals', label: 'Remove stock', icon: AlertTriangle, tone: 'danger' },
     { to: '/inventory/batches/new', label: 'Record batch', icon: PackagePlus, primary: true },
+    { to: '/suppliers/new', label: 'Add supplier', icon: Truck },
   ]
   const pharmacistItems = [
     { to: '/pharmacist', label: 'Sales workspace', icon: ShoppingBag },
