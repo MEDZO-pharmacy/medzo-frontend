@@ -9,3 +9,4 @@ export const listSuppliers = ({ activeOnly = false } = {}) => authenticatedServi
 export const getSupplier = (id) => authenticatedServiceRequest(base, `/api/suppliers/${id}`)
 export const updateSupplier = (id, supplier) => authenticatedServiceRequest(base, `/api/suppliers/${id}`, { method: 'PUT', body: JSON.stringify(supplier) })
 export const deactivateSupplier = (id) => authenticatedServiceRequest(base, `/api/suppliers/${id}/deactivate`, { method: 'PATCH' })
+export const deleteInactiveSupplier = (id) => authenticatedServiceRequest(base, `/api/suppliers/${id}`, { method: 'DELETE' })
