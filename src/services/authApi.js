@@ -132,7 +132,7 @@ export const authenticatedServiceRequest = async (baseUrl, path, options = {}) =
         : data?.detail || data?.title || fallback
       throw new ApiError(safeServerMessage, response.status, data?.errors || {}, data || {})
     }
-    if (data == null) {
+    if (data == null && response.status !== 204) {
       throw new ApiError('The Catalogue and Inventory service returned an invalid response. Please try again.', response.status)
     }
     return data
