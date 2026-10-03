@@ -27,6 +27,9 @@ import SaleIssuesPage from './features/inventory/pages/SaleIssuesPage'
 import SalesPage from './features/sales/pages/SalesPage'
 import PharmacistSalesHistoryPage from './features/sales/pages/PharmacistSalesHistoryPage'
 import AddSupplierPage from './features/suppliers/pages/AddSupplierPage'
+import SuppliersPage from './features/suppliers/pages/SuppliersPage'
+import EditSupplierPage from './features/suppliers/pages/EditSupplierPage'
+import ViewSupplierPage from './features/suppliers/pages/ViewSupplierPage'
 import './index.css'
 
 const MainLayout = () => {
@@ -74,6 +77,9 @@ function App() {
                   <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
                   <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
                   <Route path="/suppliers/new" element={<AddSupplierPage />} />
+                  <Route path="/suppliers" element={<SuppliersPage />} />
+                  <Route path="/suppliers/:supplierId" element={<ViewSupplierPage />} />
+                  <Route path="/suppliers/:supplierId/edit" element={<EditSupplierPage />} />
                 </Route>
               </Route>
             </Route>            <Route element={<ProtectedRoute roles={['Admin']} />}>

@@ -14,7 +14,7 @@ export default function InventoryWorkspaceLayout() {
     { to: '/inventory/near-expiry', label: 'Near expiry', icon: ShieldAlert, tone: 'warning' },
     { to: '/inventory/batch-removals', label: 'Remove stock', icon: AlertTriangle, tone: 'danger' },
     { to: '/inventory/batches/new', label: 'Record batch', icon: PackagePlus, primary: true },
-    { to: '/suppliers/new', label: 'Add supplier', icon: Truck },
+    { to: '/suppliers', label: 'Suppliers', icon: Truck },
   ]
   const pharmacistItems = [
     { to: '/pharmacist', label: 'Sales workspace', icon: ShoppingBag },
