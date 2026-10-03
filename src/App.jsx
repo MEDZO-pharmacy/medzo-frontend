@@ -26,6 +26,7 @@ import PurchaseReceiptsPage from './features/inventory/pages/PurchaseReceiptsPag
 import SaleIssuesPage from './features/inventory/pages/SaleIssuesPage'
 import SalesPage from './features/sales/pages/SalesPage'
 import PharmacistSalesHistoryPage from './features/sales/pages/PharmacistSalesHistoryPage'
+import AddSupplierPage from './features/suppliers/pages/AddSupplierPage'
 import './index.css'
 
 const MainLayout = () => {
@@ -72,6 +73,7 @@ function App() {
                   <Route path="/inventory/batch-removals" element={<BatchRemovalPage />} />
                   <Route path="/inventory/purchase-receipts" element={<PurchaseReceiptsPage />} />
                   <Route path="/inventory/sale-issues" element={<SaleIssuesPage />} />
+                  <Route path="/suppliers/new" element={<AddSupplierPage />} />
                 </Route>
               </Route>
             </Route>            <Route element={<ProtectedRoute roles={['Admin']} />}>
