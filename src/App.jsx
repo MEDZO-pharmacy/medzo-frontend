@@ -30,6 +30,7 @@ import AddSupplierPage from './features/suppliers/pages/AddSupplierPage'
 import SuppliersPage from './features/suppliers/pages/SuppliersPage'
 import EditSupplierPage from './features/suppliers/pages/EditSupplierPage'
 import ViewSupplierPage from './features/suppliers/pages/ViewSupplierPage'
+import CreatePurchaseOrderPage from './features/purchaseOrders/pages/CreatePurchaseOrderPage'
 import './index.css'
 
 const MainLayout = () => {
@@ -80,6 +81,7 @@ function App() {
                   <Route path="/suppliers" element={<SuppliersPage />} />
                   <Route path="/suppliers/:supplierId" element={<ViewSupplierPage />} />
                   <Route path="/suppliers/:supplierId/edit" element={<EditSupplierPage />} />
+                  <Route path="/purchase-orders/new" element={<CreatePurchaseOrderPage />} />
                 </Route>
               </Route>
             </Route>            <Route element={<ProtectedRoute roles={['Admin']} />}>
