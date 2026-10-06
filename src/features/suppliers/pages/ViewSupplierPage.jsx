@@ -13,8 +13,8 @@ export default function ViewSupplierPage() {
       .catch((requestError) => setError(requestError.message || 'Supplier details could not be loaded.'))
   }, [supplierId])
 
-  return <main className="min-h-screen bg-medzo-light-bg px-4 py-8 sm:px-6 sm:py-10">
-    <div className="mx-auto max-w-4xl">
+  return <main className="min-h-screen bg-medzo-light-bg px-5 py-7 sm:px-8 lg:px-10">
+    <div className="max-w-none">
       <Link to="/suppliers" className="text-sm font-semibold text-medzo-blue hover:underline">← Back to suppliers</Link>
       {error && <p role="alert" className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{error}</p>}
       {!error && !supplier && <p className="mt-5 text-medzo-text-light">Loading supplier...</p>}
@@ -26,7 +26,7 @@ export default function ViewSupplierPage() {
             {supplier.isActive && <Link to={`/suppliers/${supplier.id}/edit`} className="rounded-lg border border-medzo-blue px-4 py-2 text-sm font-semibold text-medzo-blue hover:bg-blue-50">Edit supplier</Link>}
           </div>
         </div>
-        <dl className="grid gap-6 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-2">
+        <dl className="mx-auto grid max-w-[80rem] gap-6 rounded-2xl bg-white p-6 shadow-sm sm:grid-cols-2">
           {[
             ['Supplier name', supplier.name],
             ['Contact person', supplier.contactName],
