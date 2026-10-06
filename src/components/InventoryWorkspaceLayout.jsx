@@ -15,7 +15,7 @@ export default function InventoryWorkspaceLayout() {
     { to: '/inventory/batch-removals', label: 'Remove stock', icon: AlertTriangle, tone: 'danger' },
     { to: '/inventory/batches/new', label: 'Record batch', icon: PackagePlus, primary: true },
     { to: '/suppliers', label: 'Suppliers', icon: Truck },
-    { to: '/purchase-orders/new', label: 'Create purchase order', icon: ClipboardList },
+    { to: '/purchase-orders', label: 'Purchase order', icon: ClipboardList },
   ]
   const pharmacistItems = [
     { to: '/pharmacist', label: 'Sales workspace', icon: ShoppingBag },
