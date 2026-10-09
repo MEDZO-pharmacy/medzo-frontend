@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { listPurchaseOrders } from '../api/purchaseOrdersApi'
 
-const dateTime = (value) => new Date(value).toLocaleString()
+const dateTime = (value) => new Intl.DateTimeFormat('en-LK', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'Asia/Colombo',
+}).format(new Date(value))
 
 export default function PurchaseOrderHistoryPage() {
   const location = useLocation()
