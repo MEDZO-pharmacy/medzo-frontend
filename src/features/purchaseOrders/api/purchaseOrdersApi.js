@@ -7,3 +7,6 @@ export const createPurchaseOrder = (order) => authenticatedServiceRequest(base, 
 })
 export const listPurchaseOrders = () => authenticatedServiceRequest(base, '/api/purchase-orders')
 export const getPurchaseOrder = (id) => authenticatedServiceRequest(base, `/api/purchase-orders/${id}`)
+export const receivePurchaseOrder = (id, receipt) => authenticatedServiceRequest(base, `/api/purchase-orders/${id}/receive`, {
+  method: 'PATCH', body: JSON.stringify(receipt),
+})
