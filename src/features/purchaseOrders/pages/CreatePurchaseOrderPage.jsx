@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { searchMedicines } from '../../catalogue/api/catalogueApi'
 import { listSuppliers } from '../../suppliers/api/suppliersApi'
 import { createPurchaseOrder } from '../api/purchaseOrdersApi'
@@ -8,6 +8,7 @@ const emptyItem = () => ({ medicineId: '', quantity: 1 })
 
 export default function CreatePurchaseOrderPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [suppliers, setSuppliers] = useState([])
   const [medicines, setMedicines] = useState([])
   const [supplierId, setSupplierId] = useState('')
@@ -18,10 +19,10 @@ export default function CreatePurchaseOrderPage() {
 
   useEffect(() => {
     Promise.all([listSuppliers({ activeOnly: true }), searchMedicines({ pageSize: 100 })])
-      .then(([supplierRows, medicineResult]) => { setSuppliers(supplierRows); setMedicines(medicineResult.items || []) })
+      .then(([supplierRows, medicineResult]) => { setSuppliers(supplierRows); setMedicines(medicineResult.items || []); const medicineId = searchParams.get('medicineId'); if (medicineId && medicineResult.items?.some((medicine) => medicine.id === medicineId)) setItems([{ medicineId, quantity: Math.max(Number(searchParams.get('quantity')) || 1, 1) }]) })
       .catch((requestError) => setError(requestError.message || 'Purchase order options could not be loaded.'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [searchParams])
 
   const updateItem = (index, key, value) => setItems((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item))
   const removeItem = (index) => setItems((current) => current.length === 1 ? current : current.filter((_, itemIndex) => itemIndex !== index))
