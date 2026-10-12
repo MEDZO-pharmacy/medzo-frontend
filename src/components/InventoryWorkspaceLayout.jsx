@@ -9,13 +9,13 @@ export default function InventoryWorkspaceLayout() {
   const inventoryManagerItems = [
     { to: '/inventory', label: 'Inventory overview', icon: ShoppingBag },
     { to: '/catalogue', label: 'Medicines', icon: Pill },
-    { to: '/inventory/purchase-receipts', label: 'Purchase updates', icon: ClipboardList },
     { to: '/inventory/low-stock', label: 'Low stock', icon: AlertTriangle, tone: 'danger' },
     { to: '/inventory/near-expiry', label: 'Near expiry', icon: ShieldAlert, tone: 'warning' },
     { to: '/inventory/batch-removals', label: 'Remove stock', icon: AlertTriangle, tone: 'danger' },
     { to: '/inventory/batches/new', label: 'Record batch', icon: PackagePlus, primary: true },
     { to: '/suppliers', label: 'Suppliers', icon: Truck },
     { to: '/purchase-orders', label: 'Purchase order', icon: ClipboardList },
+    { to: '/inventory/purchase-receipts', label: 'Purchase updates', icon: ClipboardList },
   ]
   const pharmacistItems = [
     { to: '/pharmacist', label: 'Sales workspace', icon: ShoppingBag },
