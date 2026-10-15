@@ -9,7 +9,6 @@ export default function EditSupplierPage() {
   const [supplier, setSupplier] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     getSupplier(supplierId).then(setSupplier).catch((requestError) => setError(requestError.message || 'Supplier details could not be loaded.'))
@@ -17,7 +16,7 @@ export default function EditSupplierPage() {
 
   const save = async (values) => {
     setBusy(true); setError('')
-    try { setSupplier(await updateSupplier(supplierId, values)); setSaved(true) }
+    try { const updated = await updateSupplier(supplierId, values); navigate('/suppliers', { state: { updatedSupplierName: updated.name } }) }
     catch (requestError) { setError(requestError.message || 'Supplier details could not be saved.') }
     finally { setBusy(false) }
   }
@@ -37,7 +36,6 @@ export default function EditSupplierPage() {
     <Link to="/suppliers" className="text-sm font-semibold text-medzo-blue hover:underline">← Back to suppliers</Link>
     <div className="mb-8 mt-4 flex flex-wrap items-center justify-between gap-4"><h1 className="text-2xl font-bold text-[#0a192f] sm:text-3xl">Edit supplier</h1><div className="flex items-center gap-3"><span className={`rounded-full px-3 py-1 text-sm font-semibold ${supplier.isActive ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-700'}`}>{supplier.isActive ? 'Active' : 'Inactive'}</span>{supplier.isActive && <button type="button" onClick={deactivate} disabled={busy} className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60">{busy ? 'Working...' : 'Deactivate'}</button>}</div></div>
     {error && <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{error}</p>}
-    {saved && <p role="status" className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">Supplier details updated successfully.</p>}
     <SupplierForm initial={supplier} onSubmit={save} busy={busy} submitLabel="Save changes" />
   </div></main>
 }
