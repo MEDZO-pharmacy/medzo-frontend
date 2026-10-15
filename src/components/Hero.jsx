@@ -27,7 +27,7 @@ const Hero = () => {
           <Link to="/products" className="gradient-btn text-white px-8 py-3.5 rounded-lg font-semibold hover:opacity-90 transition-opacity shadow-md shadow-blue-200 inline-block text-center">
             Products
           </Link>
-          <Link to="/read-more" className="bg-white text-[#0a192f] border border-gray-300 px-8 py-3.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-sm inline-block text-center">
+          <Link to="/about" className="bg-white text-[#0a192f] border border-gray-300 px-8 py-3.5 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-sm inline-block text-center">
             Read More
           </Link>
         </div>
