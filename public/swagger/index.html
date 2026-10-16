@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Medzo Unified API Documentation</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js" crossorigin></script>
+    <script>
+      window.onload = () => {
+        const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+        const apiBaseUrls = isLocal
+          ? { auth: 'http://localhost:5080', catalogue: 'http://localhost:5000', purchasing: 'http://localhost:5090', sales: 'http://localhost:5227' }
+          : {
+              auth: 'https://medzo-auth-service.agreeableglacier-37cd3268.centralindia.azurecontainerapps.io',
+              catalogue: 'https://medzo-catalogue-service.agreeableglacier-37cd3268.centralindia.azurecontainerapps.io',
+              purchasing: 'https://medzo-purchasing-service.agreeableglacier-37cd3268.centralindia.azurecontainerapps.io',
+              sales: 'https://medzo-sales-reporting-service.agreeableglacier-37cd3268.centralindia.azurecontainerapps.io'
+            }
+
+        window.ui = SwaggerUIBundle({
+          urls: [
+            { name: 'Authentication API', url: `${apiBaseUrls.auth}/swagger/v1/swagger.json` },
+            { name: 'Catalogue & Inventory API', url: `${apiBaseUrls.catalogue}/swagger/v1/swagger.json` },
+            { name: 'Purchasing & Suppliers API', url: `${apiBaseUrls.purchasing}/swagger/v1/swagger.json` },
+            { name: 'Sales & Reporting API', url: `${apiBaseUrls.sales}/swagger/v1/swagger.json` }
+          ],
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+          layout: 'StandaloneLayout',
+          persistAuthorization: true
+        })
+      }
+    </script>
+  </body>
+</html>
