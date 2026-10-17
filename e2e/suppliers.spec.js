@@ -5,19 +5,14 @@ test('inventory manager deactivates an active supplier through the supplier work
   await mockInventoryManagerSession(page)
   let deactivationRequested = false
 
-  await page.route(/.*/, async (route) => {
-    if (!new URL(route.request().url()).pathname.endsWith('/api/suppliers')) return route.fallback()
-    const { method } = route.request()
-    if (method === 'GET') {
-      return json(route, [{
-        id: 'supplier-1', name: 'HealthCare Distributors', contactName: 'Nimal Perera', phone: '0771234567', isActive: true,
-      }])
-    }
-    if (method === 'PATCH') {
-      deactivationRequested = true
-      return json(route, {})
-    }
-    return route.fallback()
+  await page.route('**/purchasing-supplier-api/api/suppliers?activeOnly=false', async (route) => {
+    return json(route, [{
+      id: 'supplier-1', name: 'HealthCare Distributors', contactName: 'Nimal Perera', phone: '0771234567', isActive: true,
+    }])
+  })
+  await page.route('**/purchasing-supplier-api/api/suppliers/supplier-1/deactivate', async (route) => {
+    deactivationRequested = true
+    return json(route, {})
   })
 
   await page.goto('/suppliers')
