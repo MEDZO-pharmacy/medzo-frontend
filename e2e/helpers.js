@@ -1,10 +1,11 @@
 export const mockInventoryManagerSession = async (page) => {
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
   await page.route('**/api/auth/refresh', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
         token: 'e2e-test-token',
-        expiresAt: '2099-01-01T00:00:00.000Z',
+        expiresAt,
         user: { id: 'e2e-manager', username: 'e2e.manager', roles: ['InventoryManager'] },
       }),
     })
@@ -12,12 +13,13 @@ export const mockInventoryManagerSession = async (page) => {
 }
 
 export const mockPharmacistSession = async (page) => {
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
   await page.route('**/api/auth/refresh', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
         token: 'e2e-test-token',
-        expiresAt: '2099-01-01T00:00:00.000Z',
+        expiresAt,
         user: { id: 'e2e-pharmacist', username: 'e2e.pharmacist', roles: ['Pharmacist'] },
       }),
     })
