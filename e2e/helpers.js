@@ -1,4 +1,16 @@
+const mockUnrelatedServiceCalls = async (page) => {
+  await page.route('**/api/**', async (route) => {
+    const path = new URL(route.request().url()).pathname
+    if (path.includes('/api/suppliers') || path.includes('/api/purchase-orders')) return json(route, [])
+    if (path.includes('/api/catalogue/') || path.includes('/api/inventory/')) {
+      return json(route, { items: [], totalCount: 0, page: 1, pageSize: 20 })
+    }
+    return json(route, {})
+  })
+}
+
 export const mockInventoryManagerSession = async (page) => {
+  await mockUnrelatedServiceCalls(page)
   await page.route('**/api/auth/refresh', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
@@ -12,6 +24,7 @@ export const mockInventoryManagerSession = async (page) => {
 }
 
 export const mockPharmacistSession = async (page) => {
+  await mockUnrelatedServiceCalls(page)
   await page.route('**/api/auth/refresh', async (route) => {
     await route.fulfill({
       contentType: 'application/json',
