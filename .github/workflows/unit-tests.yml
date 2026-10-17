@@ -1,0 +1,21 @@
+name: Frontend Unit Tests
+
+on:
+  push:
+    branches: [feature/se3112-unit-mocking]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Run Vitest unit tests
+        run: npm run test
