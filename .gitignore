@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+playwright-report/
+test-results/
 
 # Legacy nested application path. The deployable application lives at repository root.
 frontend/
