@@ -5,7 +5,7 @@ test('inventory manager deactivates an active supplier through the supplier work
   await mockInventoryManagerSession(page)
   let deactivationRequested = false
 
-  await page.route('**/purchasing-supplier-api/api/suppliers**', async (route) => {
+  await page.route('**/api/suppliers**', async (route) => {
     const { method } = route.request()
     if (method === 'GET') {
       return json(route, [{
