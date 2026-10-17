@@ -33,8 +33,6 @@ import ViewSupplierPage from './features/suppliers/pages/ViewSupplierPage'
 import CreatePurchaseOrderPage from './features/purchaseOrders/pages/CreatePurchaseOrderPage'
 import PurchaseOrderHistoryPage from './features/purchaseOrders/pages/PurchaseOrderHistoryPage'
 import ViewPurchaseOrderPage from './features/purchaseOrders/pages/ViewPurchaseOrderPage'
-import ApiDocumentation from './pages/ApiDocumentation'
-import SwaggerPortal from './pages/SwaggerPortal'
 import './index.css'
 
 const MainLayout = () => {
@@ -60,7 +58,6 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/read-more" element={<ReadMore />} />
               <Route path="/products" element={<Products />} />
-              <Route path="/api-docs" element={<ApiDocumentation />} />
             </Route>
             <Route element={<ProtectedRoute roles={['Pharmacist']} />}>
               <Route path="/pharmacist" element={<PharmacistDashboard />} />
@@ -96,7 +93,6 @@ function App() {
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/swagger/*" element={<SwaggerPortal />} />
           </Routes>
         </div>
       </AuthProvider>

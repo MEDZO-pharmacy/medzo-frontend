@@ -26,7 +26,6 @@ const Header = () => {
         <Link to="/services" className={isActive("/services") ? "text-medzo-blue border-b-2 border-medzo-blue pb-1" : "hover:text-medzo-blue transition-colors"}>Services</Link>
         <Link to="/about" className={isActive("/about") ? "text-medzo-blue border-b-2 border-medzo-blue pb-1" : "hover:text-medzo-blue transition-colors"}>About Us</Link>
         <Link to="/contact" className={isActive("/contact") ? "text-medzo-blue border-b-2 border-medzo-blue pb-1" : "hover:text-medzo-blue transition-colors"}>Contact</Link>
-        <Link to="/api-docs" className={isActive("/api-docs") ? "text-medzo-blue border-b-2 border-medzo-blue pb-1" : "hover:text-medzo-blue transition-colors"}>API Docs</Link>
       </nav>
 
       {/* Action Buttons */}
