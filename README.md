@@ -1,5 +1,9 @@
 # React + Vite
 
+## ASE testing modules
+
+- [Load and Performance Testing with k6](performance/README.md) — IT24101643, J.A.D.S.L. Ranasingha
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

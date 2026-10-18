@@ -1,0 +1,173 @@
+name: Load and Performance Tests
+
+on:
+  push:
+    branches:
+      - feature/load-performance-k6-testing
+    paths:
+      - "performance/**"
+      - ".github/workflows/load-performance.yml"
+  pull_request:
+    branches:
+      - Dev
+    paths:
+      - "performance/**"
+      - ".github/workflows/load-performance.yml"
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Safe profile to execute against an approved test environment
+        required: true
+        default: load
+        type: choice
+        options:
+          - smoke
+          - load
+          - stress
+      target_vus:
+        description: Base virtual-user count (stress reaches three times this value)
+        required: true
+        default: "10"
+        type: string
+      frontend_url:
+        description: Deployed frontend base URL
+        required: true
+        type: string
+      auth_api_url:
+        description: Authentication service base URL
+        required: true
+        type: string
+      catalogue_inventory_api_url:
+        description: Catalogue and inventory service base URL
+        required: true
+        type: string
+      purchasing_supplier_api_url:
+        description: Purchasing and supplier service base URL
+        required: true
+        type: string
+      sales_reporting_api_url:
+        description: Sales and reporting service base URL
+        required: true
+        type: string
+      approval:
+        description: Type LOAD_TEST_APPROVED to confirm this is an authorized non-production target
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deterministic-smoke:
+    name: k6 deterministic full-system smoke
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js for the mock services
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Set up Grafana k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Start deterministic service fixtures
+        shell: bash
+        run: |
+          mkdir -p performance/results
+          node performance/fixtures/mock-services.mjs > performance/results/mock-services.log 2>&1 &
+          for attempt in {1..20}; do
+            curl --fail --silent http://127.0.0.1:8787/health && exit 0
+            sleep 1
+          done
+          echo "Mock services did not become ready." >&2
+          exit 1
+
+      - name: Run k6 smoke quality gate
+        env:
+          PROFILE: smoke
+          FRONTEND_URL: http://127.0.0.1:8787
+          AUTH_API_URL: http://127.0.0.1:8787
+          CATALOGUE_INVENTORY_API_URL: http://127.0.0.1:8787
+          PURCHASING_SUPPLIER_API_URL: http://127.0.0.1:8787
+          SALES_REPORTING_API_URL: http://127.0.0.1:8787
+          TEST_IDENTIFIER: ci-inventory-manager@medzo.test
+          TEST_PASSWORD: ci-only-password
+          THINK_TIME_SECONDS: "0"
+          P95_MS: "750"
+          P99_MS: "1500"
+        run: k6 run performance/full-system.js
+
+      - name: Upload k6 evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: k6-smoke-evidence-${{ github.run_number }}
+          path: performance/results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  approved-environment-test:
+    name: k6 ${{ inputs.profile }} test on approved environment
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Validate safety acknowledgement and credentials
+        shell: bash
+        env:
+          APPROVAL: ${{ inputs.approval }}
+          TEST_IDENTIFIER: ${{ secrets.K6_TEST_IDENTIFIER }}
+          TEST_PASSWORD: ${{ secrets.K6_TEST_PASSWORD }}
+          ACCESS_TOKEN: ${{ secrets.K6_ACCESS_TOKEN }}
+        run: |
+          if [[ "$APPROVAL" != "LOAD_TEST_APPROVED" ]]; then
+            echo "Manual load testing requires the exact LOAD_TEST_APPROVED acknowledgement." >&2
+            exit 1
+          fi
+          if [[ -z "$ACCESS_TOKEN" && ( -z "$TEST_IDENTIFIER" || -z "$TEST_PASSWORD" ) ]]; then
+            echo "Configure K6_ACCESS_TOKEN or both K6_TEST_IDENTIFIER and K6_TEST_PASSWORD secrets." >&2
+            exit 1
+          fi
+
+      - name: Set up Grafana k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run approved full-system profile
+        env:
+          PROFILE: ${{ inputs.profile }}
+          TARGET_VUS: ${{ inputs.target_vus }}
+          FRONTEND_URL: ${{ inputs.frontend_url }}
+          AUTH_API_URL: ${{ inputs.auth_api_url }}
+          CATALOGUE_INVENTORY_API_URL: ${{ inputs.catalogue_inventory_api_url }}
+          PURCHASING_SUPPLIER_API_URL: ${{ inputs.purchasing_supplier_api_url }}
+          SALES_REPORTING_API_URL: ${{ inputs.sales_reporting_api_url }}
+          TEST_IDENTIFIER: ${{ secrets.K6_TEST_IDENTIFIER }}
+          TEST_PASSWORD: ${{ secrets.K6_TEST_PASSWORD }}
+          ACCESS_TOKEN: ${{ secrets.K6_ACCESS_TOKEN }}
+          P95_MS: "1000"
+          P99_MS: "2000"
+        run: |
+          mkdir -p performance/results
+          k6 run performance/full-system.js
+
+      - name: Upload k6 evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: k6-${{ inputs.profile }}-evidence-${{ github.run_number }}
+          path: performance/results/
+          if-no-files-found: warn
+          retention-days: 30
