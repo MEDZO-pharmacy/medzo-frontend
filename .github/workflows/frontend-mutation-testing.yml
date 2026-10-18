@@ -54,11 +54,13 @@ jobs:
       - name: Run Stryker mutation tests
         run: npm run test:mutation
 
-      - name: Upload mutation reports
+      - name: Upload HTML and JSON mutation reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: frontend-mutation-report-${{ github.run_number }}
-          path: reports/mutation/
-          if-no-files-found: warn
+          path: |
+            reports/mutation/mutation.html
+            reports/mutation/mutation.json
+          if-no-files-found: error
           retention-days: 14
