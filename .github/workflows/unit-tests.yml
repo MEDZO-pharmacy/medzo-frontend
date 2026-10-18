@@ -18,4 +18,26 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
       - name: Run Vitest unit tests
-        run: npm run test
+        run: |
+          mkdir -p TestResults
+          npm run test -- --reporter=default --reporter=junit --outputFile.junit=TestResults/results.xml
+      - name: Add Vitest test summary
+        if: always()
+        shell: pwsh
+        run: |
+          $resultFile = 'TestResults/results.xml'
+          if (-not (Test-Path $resultFile)) { "## Vitest Test Report`n`nNo JUnit result file was generated." | Add-Content $env:GITHUB_STEP_SUMMARY; exit 0 }
+          [xml]$report = Get-Content $resultFile
+          $suite = $report.DocumentElement
+          $total = [int]$suite.GetAttribute('tests')
+          $failed = [int]$suite.GetAttribute('failures') + [int]$suite.GetAttribute('errors')
+          $skipped = [int]$suite.GetAttribute('skipped')
+          $passed = $total - $failed - $skipped
+          "## Vitest Test Report`n`n| Total | Passed | Failed | Skipped |`n| ---: | ---: | ---: | ---: |`n| $total | $passed | $failed | $skipped |" | Add-Content $env:GITHUB_STEP_SUMMARY
+      - name: Upload frontend test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-unit-test-evidence
+          path: TestResults
+          if-no-files-found: warn
