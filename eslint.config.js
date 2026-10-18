@@ -22,4 +22,17 @@ export default defineConfig([
     files: ['playwright.config.js'],
     languageOptions: { globals: globals.node },
   },
+  {
+    files: ['performance/**/*.js'],
+    languageOptions: {
+      globals: { __ENV: 'readonly' },
+    },
+  },
+  {
+    files: ['performance/**/*.mjs'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])

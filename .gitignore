@@ -14,6 +14,14 @@ dist-ssr
 playwright-report/
 test-results/
 
+# Generated k6 performance evidence
+performance/results/*
+!performance/results/.gitkeep
+
+# Generated browser-test evidence
+playwright-report/
+test-results/
+
 # Legacy nested application path. The deployable application lives at repository root.
 frontend/
 

@@ -2,6 +2,11 @@
 
 React/Vite frontend for the MEDZO pharmacy microservice project.
 
+## ASE testing modules
+
+- UI / E2E Testing with Playwright — official individual role for Member 3
+- [Load & Performance Testing with k6](performance/README.md) — supplementary group quality check
+
 ## API documentation
 
 After deployment, evaluators can use the public documentation hub at
