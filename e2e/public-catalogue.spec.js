@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { json, mockUnauthenticatedSession, test } from './helpers'
 
 const medicines = [
   {
@@ -36,6 +37,7 @@ const mockPublicCatalogue = async (page) => {
 }
 
 test('visitor searches the public catalogue and clears a no-results search', async ({ page }) => {
+  await mockUnauthenticatedSession(page)
   await mockPublicCatalogue(page)
   await page.goto('/products')
 
@@ -55,4 +57,24 @@ test('visitor searches the public catalogue and clears a no-results search', asy
 
   await page.getByRole('button', { name: 'Show all available medicines' }).click()
   await expect(page.getByRole('heading', { name: 'Paracetamol 500mg' })).toBeVisible()
+})
+
+test('public catalogue reports a service outage and recovers on retry', async ({ page }) => {
+  await mockUnauthenticatedSession(page)
+  let requests = 0
+  let recovered = false
+  await page.route('**/api/catalogue/medicines/public**', (route) => {
+    requests += 1
+    return recovered
+      ? json(route, { items: medicines, page: 1, pageSize: 12, totalCount: medicines.length })
+      : json(route, { title: 'Catalogue is temporarily unavailable.' }, 503)
+  })
+
+  await page.goto('/products')
+  await expect(page.getByRole('alert')).toContainText('Catalogue is temporarily unavailable.')
+  recovered = true
+  await page.getByRole('button', { name: 'Try again' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Paracetamol 500mg' })).toBeVisible()
+  expect(requests).toBeGreaterThanOrEqual(2)
 })

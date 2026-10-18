@@ -14,6 +14,7 @@ const Login = () => {
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [completedLogin, setCompletedLogin] = useState(false)
 
   const handleChange = ({ target: { name, value } }) => {
     setFormData((current) => ({ ...current, [name]: value }))
@@ -38,6 +39,7 @@ const Login = () => {
 
     try {
       const session = await login({ identifier: formData.identifier.trim(), password: formData.password })
+      setCompletedLogin(true)
       navigate(location.state?.from?.pathname || getRoleHome(session.user), { replace: true })
     } catch (error) {
       if (error instanceof ApiError) {
@@ -51,7 +53,9 @@ const Login = () => {
     }
   }
 
-  if (!isLoading && isAuthenticated) return <Navigate to={getRoleHome(user)} replace />
+  // An already-signed-in visitor goes home; a just-completed login follows
+  // handleSubmit's original protected destination without a competing redirect.
+  if (!isLoading && isAuthenticated && !isSubmitting && !completedLogin) return <Navigate to={getRoleHome(user)} replace />
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col font-sans">
