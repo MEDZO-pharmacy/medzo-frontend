@@ -1,0 +1,33 @@
+name: Code Quality and Metrics
+
+on:
+  push:
+    branches: [feature/se3112-code-quality]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: ESLint and coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Analyze source and generate coverage dashboard
+        run: npm run quality
+      - name: Upload code quality dashboard and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-evidence
+          path: .quality-output
+          include-hidden-files: true
+          if-no-files-found: error

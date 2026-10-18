@@ -25,3 +25,7 @@ frontend/
 *.njsproj
 *.sln
 *.sw?
+
+# Generated quality metrics and coverage reports
+.quality-output/
+coverage/

@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "quality": "node scripts/run-code-quality.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.33.0",
@@ -25,6 +27,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.5.4",
     "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^7.1.1",
