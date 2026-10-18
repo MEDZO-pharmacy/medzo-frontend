@@ -54,6 +54,10 @@ jobs:
       - name: Run Stryker mutation tests
         run: npm run test:mutation
 
+      - name: Add mutation summary
+        if: always()
+        run: node .github/scripts/write-mutation-summary.mjs
+
       - name: Upload HTML and JSON mutation reports
         if: always()
         uses: actions/upload-artifact@v4
