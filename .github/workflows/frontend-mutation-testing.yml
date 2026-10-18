@@ -1,0 +1,64 @@
+name: Frontend Mutation Testing
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - Dev
+      - frontend-mutation-testing
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'stryker.config.json'
+      - '.github/workflows/frontend-mutation-testing.yml'
+  pull_request:
+    branches:
+      - Dev
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'stryker.config.json'
+      - '.github/workflows/frontend-mutation-testing.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutation-test:
+    name: StrykerJS quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify targeted unit tests
+        run: npm test -- src/features/catalogue/validation/medicineValidation.test.js src/features/inventory/validation/stockBatchValidation.test.js
+
+      - name: Run Stryker mutation tests
+        run: npm run test:mutation
+
+      - name: Upload mutation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-mutation-report-${{ github.run_number }}
+          path: reports/mutation/
+          if-no-files-found: warn
+          retention-days: 14
