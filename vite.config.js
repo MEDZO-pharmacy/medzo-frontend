@@ -36,6 +36,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     test: {
+      include: ['src/**/*.test.{js,jsx}'],
       environment: 'jsdom',
       setupFiles: './src/test/setup.js',
     },

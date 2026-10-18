@@ -21,10 +21,16 @@ test('unauthenticated visitor is redirected from a protected catalogue route', a
 
 test('login form stops invalid credentials before calling the Auth service', async ({ page }) => {
   await mockUnauthenticatedSession(page)
+  let loginRequests = 0
+  await page.route('**/api/auth/login', async (route) => {
+    loginRequests += 1
+    await route.fulfill({ status: 500, body: 'Unexpected login request' })
+  })
   await page.goto('/login')
 
   await page.getByRole('button', { name: 'Login to Account' }).click()
 
   await expect(page.getByText('Enter your Staff ID, username, or email.')).toBeVisible()
   await expect(page.getByText('Password must be at least 6 characters.')).toBeVisible()
+  expect(loginRequests).toBe(0)
 })

@@ -1,4 +1,6 @@
-# React + Vite
+# MEDZO Frontend
+
+React/Vite frontend for the MEDZO pharmacy microservice project.
 
 ## API documentation
 
@@ -35,6 +37,16 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
+For a reliable live demo on Windows, start Vite in one terminal:
+
+```bash
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+Then run `npm run test:e2e` in a second terminal. Playwright reuses the running
+server. Stop the first terminal after the demo. In CI, Playwright starts the
+server automatically.
+
 For an interactive Playwright runner, use:
 
 ```bash
@@ -54,17 +66,20 @@ npm run test:e2e:report
 Chromium, runs the six Playwright UI tests, and uploads the Playwright HTML
 report as a GitHub Actions artifact on every run.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### UI test coverage and limits
 
-Currently, two official plugins are available:
+| Workflow | What the browser test verifies |
+| --- | --- |
+| Authentication and routing | Protected-route redirect and blank-login validation |
+| Public catalogue | Search, no-results message, and reset |
+| Suppliers | Deactivation request and updated status |
+| Purchase orders | Low-stock suggestion opens a prefilled new-order route |
+| Sales | Sale request payload and receipt display |
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+These tests verify frontend behavior with mocked API responses, not a live
+microservice-to-database integration. In particular, the purchase-order test
+checks navigation to the new-order form; it does not submit an order.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+For the SE3112 group submission, this workflow is the UI testing layer. The
+other three individual testing/quality layers and any unified group pipeline
+must be integrated and documented by the team separately.
