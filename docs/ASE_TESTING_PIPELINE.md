@@ -66,3 +66,14 @@ Use these exact names in README files, GitHub summaries, artifact explanations, 
 5. `Supplementary Load & Performance Check`
 
 Always add `Common scope: Catalogue/Inventory vertical slice`. Never present item 5 as a fifth individual role.
+
+## Verified GitHub evidence
+
+Unified run [#1](https://github.com/MEDZO-pharmacy/medzo-frontend/actions/runs/40106315604) completed successfully on commit `6de0bbc`:
+
+- Unit Testing & Mocking: 26 passed, 0 failed, 0 skipped.
+- Mutation Testing: 98.89% mutation score; configured break threshold 80%.
+- UI / E2E Testing: seven targeted Catalogue/Inventory browser cases passed.
+- Code Quality & Metrics: analyzer, test, coverage, and dashboard gate passed.
+- Supplementary Load & Performance Check: deterministic k6 smoke gate passed.
+- Unified result: success in 56 seconds with five evidence artifacts.
