@@ -10,10 +10,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:catalogue-inventory": "playwright test e2e/public-catalogue.spec.js e2e/catalogue-inventory.spec.js",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
     "performance:mock": "node performance/fixtures/mock-services.mjs",
-    "test:performance": "k6 run performance/full-system.js"
+    "test:performance": "k6 run performance/catalogue-inventory.js"
   },
   "dependencies": {
     "lucide-react": "^1.33.0",

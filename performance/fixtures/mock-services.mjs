@@ -43,18 +43,11 @@ const server = http.createServer(async (request, response) => {
   const protectedPagedRoutes = new Set([
     '/api/catalogue/medicines',
     '/api/inventory/items',
-    '/api/sale-items',
-    '/api/expiry-alerts',
+    '/api/inventory/items/low-stock',
+    '/api/inventory/batches/near-expiry',
   ]);
   if (request.method === 'GET' && protectedPagedRoutes.has(url.pathname)) {
     return bearerAccepted(request) ? json(response, 200, paged) : json(response, 401, { message: 'Unauthorized' });
-  }
-
-  const protectedArrayRoutes = new Set(['/api/suppliers', '/api/purchase-orders']);
-  if (request.method === 'GET' && protectedArrayRoutes.has(url.pathname)) {
-    return bearerAccepted(request)
-      ? json(response, 200, [{ id: '00000000-0000-0000-0000-000000000001' }])
-      : json(response, 401, { message: 'Unauthorized' });
   }
 
   return json(response, 404, { message: `No mock route for ${request.method} ${url.pathname}` });

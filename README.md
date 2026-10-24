@@ -4,8 +4,20 @@ React/Vite frontend for the MEDZO pharmacy microservice project.
 
 ## ASE testing modules
 
-- UI / E2E Testing with Playwright — official individual role for Member 3
-- [Load & Performance Testing with k6](performance/README.md) — supplementary group quality check
+**Common scope:** Catalogue/Inventory vertical slice
+
+| Classification | Owner | Strategy | Tools |
+| --- | --- | --- | --- |
+| Official role | Member 1 | Unit Testing & Mocking | xUnit, Moq, Coverlet |
+| Official role | Member 2 | Mutation Testing | Stryker.NET |
+| Official role | Member 3 | UI / E2E Testing | Playwright |
+| Official role | Member 4 | Code Quality & Metrics | .NET analyzers, Coverlet |
+| Supplementary group check | Team | Load & Performance | Grafana k6 |
+
+See the [unified pipeline guide](docs/ASE_TESTING_PIPELINE.md). Load &
+Performance is supplementary and is not a fifth individual role. The current
+Code Quality implementation is not a SonarQube scan, so evidence is labelled
+with its actual tools.
 
 ## API documentation
 
@@ -72,10 +84,15 @@ npm run test:e2e:report
 
 ### CI pipeline
 
-`.github/workflows/ui-e2e.yml` runs on pushes to `Dev` and
-`feature/ui-e2e-playwright-testing`, and on relevant pull requests. It installs
-Chromium, runs the eighteen Playwright UI tests, and uploads the Playwright HTML
-report as a GitHub Actions artifact on every run.
+`.github/workflows/ui-e2e.yml` runs on pushes to `Dev` and the UI
+feature/unified branches, and on relevant pull requests. It installs Chromium,
+runs all 23 Playwright tests as a standalone regression workflow, and uploads
+the HTML report. When called by the unified workflow it runs the seven-case
+Catalogue/Inventory quality gate instead.
+
+The separate `.github/workflows/ase-unified-testing.yml` connects all four
+official roles and the supplementary k6 check into one Catalogue/Inventory
+pipeline without removing the contributors' standalone workflows.
 
 ### UI test coverage and limits
 
@@ -98,7 +115,8 @@ database and does not change shared records.
 ### Two-minute individual demo
 
 1. Start Vite in one terminal using the command above. In a second terminal,
-   run `npm.cmd run test:e2e -- --reporter=line` and point out `18 passed`.
+   run `npm.cmd run test:e2e:catalogue-inventory -- --reporter=line` and point
+   out the seven targeted cases passing.
 2. Explain that Playwright drives the real React UI in Chromium, while each
    service response is controlled at the browser network boundary. The request
    guard catches any missing mock, so a running or stopped backend cannot
@@ -110,6 +128,6 @@ database and does not change shared records.
    layer, not a live cross-service/database test. The HTML report and CI run
    are evidence; a live-backend smoke test needs a healthy test environment.
 
-For the SE3112 group submission, this workflow is the UI testing layer. The
-other three individual testing/quality layers and any unified group pipeline
-must be integrated and documented by the team separately.
+For the SE3112 group submission, Playwright is Member 3's official layer. The
+unified workflow combines it with the other three official roles and the
+supplementary performance gate under the same Catalogue/Inventory scope.

@@ -1,0 +1,186 @@
+name: ASE Unified Testing Pipeline
+
+on:
+  push:
+    branches: [feature/se3112-unified-testing-pipeline]
+  pull_request:
+    branches: [Dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ase-unified-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-testing:
+    name: Member 1 - Unit Testing & Mocking
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out Catalogue/Inventory unit-testing contribution
+        uses: actions/checkout@v7
+        with:
+          repository: MEDZO-pharmacy/medzo-catalogue-inventory-service
+          ref: feature/se3112-unit-mocking
+          path: catalogue-inventory
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Run xUnit tests, Moq tests and Coverlet
+        working-directory: catalogue-inventory
+        run: dotnet test tests/Medzo.CatalogueInventory.UnitTests/Medzo.CatalogueInventory.UnitTests.csproj --configuration Release --collect:"XPlat Code Coverage" --logger "trx;LogFileName=results.trx" --results-directory TestResults
+      - name: Publish unit-test summary
+        if: always()
+        shell: pwsh
+        working-directory: catalogue-inventory
+        run: |
+          "## Unit Testing & Mocking`n`n**Common scope:** Catalogue/Inventory vertical slice  `n**Owner:** Member 1  `n**Tools:** xUnit, Moq, Coverlet" | Add-Content $env:GITHUB_STEP_SUMMARY
+          $trx = Get-ChildItem -Recurse TestResults -Filter results.trx | Select-Object -First 1
+          if ($trx) {
+            [xml]$report = Get-Content $trx.FullName
+            $c = $report.TestRun.ResultSummary.Counters
+            "`n| Total | Passed | Failed | Skipped |`n| ---: | ---: | ---: | ---: |`n| $($c.total) | $($c.passed) | $($c.failed) | $($c.notExecuted) |" | Add-Content $env:GITHUB_STEP_SUMMARY
+          }
+      - name: Upload unit-test evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-testing-mocking-evidence-${{ github.run_number }}
+          path: catalogue-inventory/TestResults/
+          if-no-files-found: warn
+          retention-days: 14
+
+  mutation-testing:
+    name: Member 2 - Mutation Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out Catalogue/Inventory mutation contribution
+        uses: actions/checkout@v7
+        with:
+          repository: MEDZO-pharmacy/medzo-catalogue-inventory-service
+          ref: catalogue-mutation-testing
+          path: catalogue-inventory
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore tools and packages
+        working-directory: catalogue-inventory
+        run: |
+          dotnet tool restore
+          dotnet restore Medzo.CatalogueInventory.slnx
+      - name: Verify unit-test baseline
+        working-directory: catalogue-inventory
+        run: dotnet test tests/Medzo.CatalogueInventory.UnitTests/Medzo.CatalogueInventory.UnitTests.csproj --configuration Release --no-restore
+      - name: Run Stryker.NET mutation quality gate
+        working-directory: catalogue-inventory/tests/Medzo.CatalogueInventory.UnitTests
+        run: dotnet stryker --skip-version-check
+      - name: Publish mutation summary
+        if: always()
+        shell: bash
+        working-directory: catalogue-inventory
+        run: |
+          echo "## Mutation Testing" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Common scope:** Catalogue/Inventory vertical slice  " >> "$GITHUB_STEP_SUMMARY"
+          echo "**Owner:** Member 2  " >> "$GITHUB_STEP_SUMMARY"
+          echo "**Tool:** Stryker.NET" >> "$GITHUB_STEP_SUMMARY"
+          report=$(find tests/Medzo.CatalogueInventory.UnitTests/StrykerOutput -type f -name mutation-report.md 2>/dev/null | sort | tail -n 1)
+          [[ -n "$report" ]] && cat "$report" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload mutation evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mutation-testing-evidence-${{ github.run_number }}
+          path: catalogue-inventory/tests/Medzo.CatalogueInventory.UnitTests/StrykerOutput/**/reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+  ui-e2e-testing:
+    name: Member 3 - UI / E2E Testing
+    uses: ./.github/workflows/ui-e2e.yml
+    with:
+      scope: catalogue-inventory
+
+  code-quality:
+    name: Member 4 - Code Quality & Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out Catalogue/Inventory quality contribution
+        uses: actions/checkout@v7
+        with:
+          repository: MEDZO-pharmacy/medzo-catalogue-inventory-service
+          ref: feature/se3112-code-quality
+          path: catalogue-inventory
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Run analyzer, coverage and quality gate
+        shell: pwsh
+        working-directory: catalogue-inventory
+        run: ./scripts/Run-CodeQuality.ps1
+      - name: Publish role and scope
+        if: always()
+        shell: bash
+        run: |
+          echo "## Code Quality & Metrics" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Common scope:** Catalogue/Inventory vertical slice  " >> "$GITHUB_STEP_SUMMARY"
+          echo "**Owner:** Member 4  " >> "$GITHUB_STEP_SUMMARY"
+          echo "**Tools:** .NET analyzers and Coverlet (not a SonarQube result)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload code-quality evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: code-quality-metrics-evidence-${{ github.run_number }}
+          path: catalogue-inventory/.quality-output/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
+  supplementary-performance:
+    name: Supplementary - Load & Performance Check
+    uses: ./.github/workflows/load-performance.yml
+
+  unified-summary:
+    name: Unified pipeline result
+    if: always()
+    needs: [unit-testing, mutation-testing, ui-e2e-testing, code-quality, supplementary-performance]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish unified Catalogue/Inventory matrix
+        shell: bash
+        env:
+          UNIT: ${{ needs.unit-testing.result }}
+          MUTATION: ${{ needs.mutation-testing.result }}
+          UI_E2E: ${{ needs.ui-e2e-testing.result }}
+          QUALITY: ${{ needs.code-quality.result }}
+          PERFORMANCE: ${{ needs.supplementary-performance.result }}
+        run: |
+          {
+            echo "# ASE Unified Testing Pipeline"
+            echo ""
+            echo "**Common scope:** Catalogue/Inventory vertical slice"
+            echo ""
+            echo "| Classification | Owner | Testing/quality strategy | Result |"
+            echo "| --- | --- | --- | --- |"
+            echo "| Official role | Member 1 | Unit Testing & Mocking | $UNIT |"
+            echo "| Official role | Member 2 | Mutation Testing | $MUTATION |"
+            echo "| Official role | Member 3 | UI / E2E Testing | $UI_E2E |"
+            echo "| Official role | Member 4 | Code Quality & Metrics | $QUALITY |"
+            echo "| Supplementary group check | Team | Load & Performance | $PERFORMANCE |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Enforce the unified quality gate
+        shell: bash
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          if [[ "$RESULTS" == *failure* || "$RESULTS" == *cancelled* ]]; then
+            echo "One or more testing layers failed: $RESULTS" >&2
+            exit 1
+          fi

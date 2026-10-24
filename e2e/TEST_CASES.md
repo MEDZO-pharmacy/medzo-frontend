@@ -4,6 +4,12 @@ The browser loads the real React frontend. Each service response is explicitly
 mocked at the network boundary; an unmocked API request fails the test. These
 are UI workflow tests, **not** proof that Azure APIs, SQL, or Kafka are online.
 
+## Unified Catalogue/Inventory quality gate
+
+The unified ASE pipeline runs seven targeted cases: `CAT-01`, `CAT-02`, and
+`SLICE-01` through `SLICE-05`. The full standalone UI workflow runs all 23
+cases as extended frontend regression evidence.
+
 | ID | File | Scenario and expected browser result |
 | --- | --- | --- |
 | AUTH-01 | `auth-and-routing.spec.js` | Unauthenticated `/catalogue` visit redirects to login. |
@@ -13,6 +19,11 @@ are UI workflow tests, **not** proof that Azure APIs, SQL, or Kafka are online.
 | AUTH-05 | `auth-and-routing.spec.js` | Pharmacist is redirected away from inventory-manager supplier management. |
 | CAT-01 | `public-catalogue.spec.js` | Search filters medicines; no-results and clear actions behave correctly. |
 | CAT-02 | `public-catalogue.spec.js` | Catalogue outage shows an error and retry recovers. |
+| SLICE-01 | `catalogue-inventory.spec.js` | Unauthenticated access to the protected Catalogue workspace redirects to login. |
+| SLICE-02 | `catalogue-inventory.spec.js` | Inventory manager searches, sees no results, clears, and restores the protected catalogue. |
+| SLICE-03 | `catalogue-inventory.spec.js` | Inventory overview combines medicine count, available units, and low-stock signal. |
+| SLICE-04 | `catalogue-inventory.spec.js` | Near-expiry window change reloads and renders the expected batch evidence. |
+| SLICE-05 | `catalogue-inventory.spec.js` | Inventory outage is visible and retry restores stock records. |
 | SUP-01 | `suppliers.spec.js` | Successful deactivation changes visible supplier status. |
 | SUP-02 | `suppliers.spec.js` | Failed deactivation shows the server error and keeps the supplier active. |
 | SUP-03 | `suppliers.spec.js` | Supplier form sends the expected create payload and displays confirmation. |
@@ -29,6 +40,12 @@ Run locally with Vite already listening on `127.0.0.1:5173`:
 
 ```powershell
 npm.cmd run test:e2e -- --reporter=line
+```
+
+Run only the common assessment scope with:
+
+```powershell
+npm.cmd run test:e2e:catalogue-inventory -- --reporter=line
 ```
 
 The HTML report, screenshots, video, and traces are retained for failures.

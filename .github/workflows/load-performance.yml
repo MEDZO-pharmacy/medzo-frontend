@@ -1,56 +1,43 @@
-name: Load and Performance Tests
+name: Supplementary Load and Performance Check
 
 on:
+  workflow_call:
+    secrets:
+      K6_ACCESS_TOKEN:
+        required: false
+      K6_TEST_IDENTIFIER:
+        required: false
+      K6_TEST_PASSWORD:
+        required: false
   push:
-    branches:
-      - feature/load-performance-k6-testing
-    paths:
-      - "performance/**"
-      - ".github/workflows/load-performance.yml"
+    branches: [feature/load-performance-k6-testing, feature/se3112-unified-testing-pipeline]
+    paths: ["performance/**", "package.json", ".github/workflows/load-performance.yml"]
   pull_request:
-    branches:
-      - Dev
-    paths:
-      - "performance/**"
-      - ".github/workflows/load-performance.yml"
+    branches: [Dev]
+    paths: ["performance/**", "package.json", ".github/workflows/load-performance.yml"]
   workflow_dispatch:
     inputs:
       profile:
-        description: Safe profile to execute against an approved test environment
+        description: Safe profile for an approved non-production environment
         required: true
         default: load
         type: choice
-        options:
-          - smoke
-          - load
-          - stress
+        options: [smoke, load, stress]
       target_vus:
-        description: Base virtual-user count (stress reaches three times this value)
+        description: Base virtual-user count
         required: true
         default: "10"
         type: string
-      frontend_url:
-        description: Deployed frontend base URL
+      catalogue_inventory_api_url:
+        description: Catalogue/Inventory service base URL
         required: true
         type: string
       auth_api_url:
-        description: Authentication service base URL
-        required: true
-        type: string
-      catalogue_inventory_api_url:
-        description: Catalogue and inventory service base URL
-        required: true
-        type: string
-      purchasing_supplier_api_url:
-        description: Purchasing and supplier service base URL
-        required: true
-        type: string
-      sales_reporting_api_url:
-        description: Sales and reporting service base URL
-        required: true
+        description: Auth URL when K6_ACCESS_TOKEN is not configured
+        required: false
         type: string
       approval:
-        description: Type LOAD_TEST_APPROVED to confirm this is an authorized non-production target
+        description: Type LOAD_TEST_APPROVED for an authorized non-production target
         required: true
         type: string
 
@@ -58,29 +45,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: performance-${{ github.workflow }}-${{ github.ref }}
+  group: catalogue-inventory-performance-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   deterministic-smoke:
-    name: k6 deterministic full-system smoke
+    name: k6 Catalogue/Inventory smoke gate
     if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out source
         uses: actions/checkout@v7
-
-      - name: Set up Node.js for the mock services
+      - name: Set up Node.js for deterministic fixtures
         uses: actions/setup-node@v7
         with:
           node-version: "24"
           package-manager-cache: false
-
       - name: Set up Grafana k6
         uses: grafana/setup-k6-action@v1
-
-      - name: Start deterministic service fixtures
+      - name: Start deterministic Catalogue/Inventory fixtures
         shell: bash
         run: |
           mkdir -p performance/results
@@ -91,40 +75,42 @@ jobs:
           done
           echo "Mock services did not become ready." >&2
           exit 1
-
-      - name: Run k6 smoke quality gate
+      - name: Run supplementary k6 smoke quality gate
         env:
           PROFILE: smoke
-          FRONTEND_URL: http://127.0.0.1:8787
-          AUTH_API_URL: http://127.0.0.1:8787
           CATALOGUE_INVENTORY_API_URL: http://127.0.0.1:8787
-          PURCHASING_SUPPLIER_API_URL: http://127.0.0.1:8787
-          SALES_REPORTING_API_URL: http://127.0.0.1:8787
-          TEST_IDENTIFIER: ci-inventory-manager@medzo.test
-          TEST_PASSWORD: ci-only-password
+          ACCESS_TOKEN: ci-catalogue-inventory-token
           THINK_TIME_SECONDS: "0"
           P95_MS: "750"
           P99_MS: "1500"
-        run: k6 run performance/full-system.js
-
+        run: npm run test:performance
+      - name: Publish supplementary performance summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f performance/results/summary.md ]]; then
+            cat performance/results/summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Supplementary Load & Performance Check" >> "$GITHUB_STEP_SUMMARY"
+            echo "No summary was generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Upload k6 evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: k6-smoke-evidence-${{ github.run_number }}
+          name: supplementary-k6-catalogue-inventory-${{ github.run_number }}
           path: performance/results/
           if-no-files-found: warn
           retention-days: 14
 
   approved-environment-test:
-    name: k6 ${{ inputs.profile }} test on approved environment
+    name: k6 ${{ inputs.profile }} on approved Catalogue/Inventory environment
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@v7
-
       - name: Validate safety acknowledgement and credentials
         shell: bash
         env:
@@ -134,26 +120,21 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.K6_ACCESS_TOKEN }}
         run: |
           if [[ "$APPROVAL" != "LOAD_TEST_APPROVED" ]]; then
-            echo "Manual load testing requires the exact LOAD_TEST_APPROVED acknowledgement." >&2
+            echo "Manual load testing requires LOAD_TEST_APPROVED." >&2
             exit 1
           fi
           if [[ -z "$ACCESS_TOKEN" && ( -z "$TEST_IDENTIFIER" || -z "$TEST_PASSWORD" ) ]]; then
-            echo "Configure K6_ACCESS_TOKEN or both K6_TEST_IDENTIFIER and K6_TEST_PASSWORD secrets." >&2
+            echo "Configure K6_ACCESS_TOKEN or both K6_TEST_IDENTIFIER and K6_TEST_PASSWORD." >&2
             exit 1
           fi
-
       - name: Set up Grafana k6
         uses: grafana/setup-k6-action@v1
-
-      - name: Run approved full-system profile
+      - name: Run approved Catalogue/Inventory profile
         env:
           PROFILE: ${{ inputs.profile }}
           TARGET_VUS: ${{ inputs.target_vus }}
-          FRONTEND_URL: ${{ inputs.frontend_url }}
-          AUTH_API_URL: ${{ inputs.auth_api_url }}
           CATALOGUE_INVENTORY_API_URL: ${{ inputs.catalogue_inventory_api_url }}
-          PURCHASING_SUPPLIER_API_URL: ${{ inputs.purchasing_supplier_api_url }}
-          SALES_REPORTING_API_URL: ${{ inputs.sales_reporting_api_url }}
+          AUTH_API_URL: ${{ inputs.auth_api_url }}
           TEST_IDENTIFIER: ${{ secrets.K6_TEST_IDENTIFIER }}
           TEST_PASSWORD: ${{ secrets.K6_TEST_PASSWORD }}
           ACCESS_TOKEN: ${{ secrets.K6_ACCESS_TOKEN }}
@@ -161,13 +142,17 @@ jobs:
           P99_MS: "2000"
         run: |
           mkdir -p performance/results
-          k6 run performance/full-system.js
-
+          npm run test:performance
+      - name: Publish supplementary performance summary
+        if: always()
+        shell: bash
+        run: |
+          [[ -f performance/results/summary.md ]] && cat performance/results/summary.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload k6 evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: k6-${{ inputs.profile }}-evidence-${{ github.run_number }}
+          name: supplementary-k6-${{ inputs.profile }}-${{ github.run_number }}
           path: performance/results/
           if-no-files-found: warn
           retention-days: 30

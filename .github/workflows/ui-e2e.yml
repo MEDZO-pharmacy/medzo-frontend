@@ -1,6 +1,13 @@
 name: UI End-to-End Tests
 
 on:
+  workflow_call:
+    inputs:
+      scope:
+        description: Use catalogue-inventory for the unified ASE vertical slice, otherwise run the full UI suite
+        required: false
+        type: string
+        default: full
   pull_request:
     branches: [Dev]
     paths:
@@ -11,7 +18,7 @@ on:
       - 'src/**'
       - '.github/workflows/ui-e2e.yml'
   push:
-    branches: [Dev, feature/ui-e2e-playwright-testing]
+    branches: [Dev, feature/ui-e2e-playwright-testing, feature/se3112-unified-testing-pipeline]
 
 jobs:
   playwright:
@@ -35,13 +42,27 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run UI/E2E tests
+      - name: Run Catalogue/Inventory UI/E2E quality gate
+        if: inputs.scope == 'catalogue-inventory'
+        run: npm run test:e2e:catalogue-inventory
+
+      - name: Run full UI/E2E regression suite
+        if: inputs.scope != 'catalogue-inventory'
         run: npm run test:e2e
+
+      - name: Publish UI/E2E summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## UI / E2E Testing" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Common scope:** Catalogue/Inventory vertical slice" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Owner:** Member 3" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Tool:** Playwright" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: ui-e2e-playwright-report-${{ github.run_number }}
           path: playwright-report/
           retention-days: 14
