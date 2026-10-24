@@ -153,6 +153,9 @@ jobs:
     needs: [unit-testing, mutation-testing, ui-e2e-testing, code-quality, supplementary-performance]
     runs-on: ubuntu-latest
     steps:
+      - name: Check out monitor source
+        uses: actions/checkout@v7
+
       - name: Publish unified Catalogue/Inventory matrix
         shell: bash
         env:
@@ -175,6 +178,32 @@ jobs:
             echo "| Official role | Member 4 | Code Quality & Metrics | $QUALITY |"
             echo "| Supplementary group check | Team | Load & Performance | $PERFORMANCE |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Generate read-only ASE monitor
+        env:
+          ASE_BRANCH: ${{ github.ref_name }}
+          ASE_RUN_NUMBER: ${{ github.run_number }}
+          ASE_UNIT: ${{ needs.unit-testing.result }}
+          ASE_MUTATION: ${{ needs.mutation-testing.result }}
+          ASE_UI_E2E: ${{ needs.ui-e2e-testing.result }}
+          ASE_QUALITY: ${{ needs.code-quality.result }}
+          ASE_PERFORMANCE: ${{ needs.supplementary-performance.result }}
+        run: node ase-monitor/generate-status.mjs
+
+      - name: Upload unified pipeline monitor
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ase-testing-monitor-${{ github.run_number }}
+          path: |
+            ase-monitor/index.html
+            ase-monitor/styles.css
+            ase-monitor/app.js
+            ase-monitor/run-status.js
+            ase-monitor/README.md
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Enforce the unified quality gate
         shell: bash
         env:

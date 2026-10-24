@@ -6,15 +6,15 @@ All automated layers use the **Catalogue/Inventory vertical slice** as their com
 
 ## Ownership and terminology
 
-| Classification | Owner | Strategy | Tools | Primary evidence |
+| Classification | Owner | Strategy | Owned source branch | Primary evidence |
 | --- | --- | --- | --- | --- |
-| Official individual role | Member 1 | Unit Testing & Mocking | xUnit, Moq, Coverlet | TRX and coverage |
-| Official individual role | Member 2 | Mutation Testing | Stryker.NET | HTML, JSON, Markdown mutation reports |
-| Official individual role | Member 3 | UI / E2E Testing | Playwright | HTML browser report, failure trace/video/screenshot |
-| Official individual role | Member 4 | Code Quality & Metrics | .NET analyzers, Coverlet | HTML dashboard, SARIF, coverage |
-| Supplementary group quality check | Team | Load & Performance | Grafana k6 | Markdown/JSON latency and threshold report |
+| Official individual role | Member 1 | Unit Testing & Mocking | `feature/se3112-unit-mocking` | xUnit/Moq TRX and Coverlet coverage |
+| Official individual role | Member 2 | Mutation Testing | `catalogue-mutation-testing` | Stryker.NET HTML, JSON, and Markdown reports |
+| Official individual role | Member 3 | UI / E2E Testing | `feature/se3112-unified-testing-pipeline` | Playwright HTML report, failure trace/video/screenshot |
+| Official individual role | Member 4 | Code Quality & Metrics | `feature/se3112-code-quality` | .NET analyzer dashboard, SARIF, and coverage |
+| Supplementary group quality check | Team | Load & Performance | `feature/se3112-unified-testing-pipeline` | k6 Markdown/JSON latency and threshold report |
 
-The current Code Quality contribution is not a SonarQube scan. Reports and slides therefore use **Code Quality & Metrics (.NET analyzers + Coverlet)**. SonarQube must only be named as implemented after an actual SonarQube workflow and dashboard exist.
+The current Code Quality contribution is not a SonarQube scan. Submission evidence therefore uses **Code Quality & Metrics (.NET analyzers + Coverlet)**. SonarQube must only be named as implemented after an actual SonarQube workflow and dashboard exist.
 
 ## Unified execution
 
@@ -40,6 +40,7 @@ The official jobs check out the contributors' Catalogue/Inventory branches. The 
 - Unified workflow: `.github/workflows/ase-unified-testing.yml`
 - Existing UI workflow: `.github/workflows/ui-e2e.yml`
 - Existing supplementary performance workflow: `.github/workflows/load-performance.yml`
+- Read-only monitor artifact source: `ase-monitor/`
 - Targeted UI command: `npm run test:e2e:catalogue-inventory`
 - Supplementary k6 command: `npm run test:performance`
 
@@ -57,7 +58,7 @@ These results prove test logic and automation, not deployed database availabilit
 
 ## Consistent report labels
 
-Use these exact names in README files, GitHub summaries, artifact explanations, and slides:
+Use these exact names in README files, GitHub summaries, and artifact explanations:
 
 1. `Unit Testing & Mocking`
 2. `Mutation Testing`
@@ -73,7 +74,7 @@ Unified run [#1](https://github.com/MEDZO-pharmacy/medzo-frontend/actions/runs/4
 
 - Unit Testing & Mocking: 26 passed, 0 failed, 0 skipped.
 - Mutation Testing: 98.89% mutation score; configured break threshold 80%.
-- UI / E2E Testing: seven targeted Catalogue/Inventory browser cases passed.
+- UI / E2E Testing: seven targeted Catalogue/Inventory browser cases passed in the verified run below. The current quality gate defines thirteen cases covering happy paths, access control, empty states, concurrency conflicts, and outage recovery.
 - Code Quality & Metrics: analyzer, test, coverage, and dashboard gate passed.
 - Supplementary Load & Performance Check: deterministic k6 smoke gate passed.
 - Unified result: success in 56 seconds with five evidence artifacts.

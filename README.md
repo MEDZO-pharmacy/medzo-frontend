@@ -86,13 +86,19 @@ npm run test:e2e:report
 
 `.github/workflows/ui-e2e.yml` runs on pushes to `Dev` and the UI
 feature/unified branches, and on relevant pull requests. It installs Chromium,
-runs all 23 Playwright tests as a standalone regression workflow, and uploads
-the HTML report. When called by the unified workflow it runs the seven-case
+runs all 29 Playwright tests as a standalone regression workflow, and uploads
+the HTML report. When called by the unified workflow it runs the thirteen-case
 Catalogue/Inventory quality gate instead.
 
 The separate `.github/workflows/ase-unified-testing.yml` connects all four
 official roles and the supplementary k6 check into one Catalogue/Inventory
 pipeline without removing the contributors' standalone workflows.
+
+Its final job also uploads `ase-testing-monitor-*`, a read-only static dashboard
+showing the four role results, owned source branches, evidence types, and the
+supplementary k6 result. Extract the artifact and open `index.html`. The monitor
+is not part of the Vite production build and never calls the application, APIs,
+or database.
 
 ### UI test coverage and limits
 
@@ -116,7 +122,7 @@ database and does not change shared records.
 
 1. Start Vite in one terminal using the command above. In a second terminal,
    run `npm.cmd run test:e2e:catalogue-inventory -- --reporter=line` and point
-   out the seven targeted cases passing.
+   out the thirteen targeted cases passing.
 2. Explain that Playwright drives the real React UI in Chromium, while each
    service response is controlled at the browser network boundary. The request
    guard catches any missing mock, so a running or stopped backend cannot

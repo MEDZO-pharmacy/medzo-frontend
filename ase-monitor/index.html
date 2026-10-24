@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Read-only MEDZO ASE unified testing pipeline monitor" />
+    <title>MEDZO ASE Pipeline Monitor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">SE3112 · Advanced Software Engineering</p>
+          <h1>Unified testing pipeline</h1>
+          <p class="lead">One Catalogue/Inventory vertical slice. Four independently owned quality strategies. One release decision.</p>
+        </div>
+        <div id="gate" class="gate" aria-live="polite">
+          <span class="gate-dot"></span>
+          <div><small>Unified gate</small><strong id="gate-label">Ready</strong></div>
+        </div>
+      </header>
+
+      <section class="run-strip" aria-label="Pipeline run metadata">
+        <div><span>Scope</span><strong>Catalogue / Inventory</strong></div>
+        <div><span>Branch</span><strong id="branch">Local preview</strong></div>
+        <div><span>Run</span><strong id="run-number">Not started</strong></div>
+        <div><span>Updated</span><strong id="updated">Local artifact</strong></div>
+      </section>
+
+      <section class="section-heading">
+        <div><p class="eyebrow">Official assessment roles</p><h2>Four-member quality matrix</h2></div>
+        <p id="role-summary" class="summary">Waiting for a unified workflow run.</p>
+      </section>
+      <section id="role-grid" class="role-grid" aria-label="Official assessment role results"></section>
+
+      <section class="supplementary">
+        <div>
+          <span class="supplementary-label">Supplementary group check</span>
+          <h2>Load &amp; Performance Testing</h2>
+          <p>k6 verifies response-time and failure-rate thresholds. It strengthens the submission but does not replace any of the four official individual roles.</p>
+        </div>
+        <div id="performance-status" class="status-pill status-ready">Ready</div>
+      </section>
+
+      <section class="evidence">
+        <div><p class="eyebrow">Evidence model</p><h2>How to read this monitor</h2></div>
+        <ol>
+          <li>Each card maps one official role to its own source branch and evidence artifact.</li>
+          <li>The unified gate passes only when every official role and the supplementary check pass.</li>
+          <li>This page is a downloadable workflow artifact; it never calls the MEDZO app, API, or database.</li>
+        </ol>
+      </section>
+    </main>
+    <script src="run-status.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

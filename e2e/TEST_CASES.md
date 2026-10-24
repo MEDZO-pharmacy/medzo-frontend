@@ -6,8 +6,8 @@ are UI workflow tests, **not** proof that Azure APIs, SQL, or Kafka are online.
 
 ## Unified Catalogue/Inventory quality gate
 
-The unified ASE pipeline runs seven targeted cases: `CAT-01`, `CAT-02`, and
-`SLICE-01` through `SLICE-05`. The full standalone UI workflow runs all 23
+The unified ASE pipeline runs thirteen targeted cases: `CAT-01`, `CAT-02`, and
+`SLICE-01` through `SLICE-11`. The full standalone UI workflow runs all 29
 cases as extended frontend regression evidence.
 
 | ID | File | Scenario and expected browser result |
@@ -24,6 +24,12 @@ cases as extended frontend regression evidence.
 | SLICE-03 | `catalogue-inventory.spec.js` | Inventory overview combines medicine count, available units, and low-stock signal. |
 | SLICE-04 | `catalogue-inventory.spec.js` | Near-expiry window change reloads and renders the expected batch evidence. |
 | SLICE-05 | `catalogue-inventory.spec.js` | Inventory outage is visible and retry restores stock records. |
+| SLICE-06 | `catalogue-inventory.spec.js` | Low-stock search shows no match and clear restores the reorder candidate. |
+| SLICE-07 | `catalogue-inventory.spec.js` | Low-stock service error remains visible until retry succeeds. |
+| SLICE-08 | `catalogue-inventory.spec.js` | A stale catalogue delete receives HTTP 409 and preserves the medicine. |
+| SLICE-09 | `catalogue-inventory.spec.js` | Near-expiry outage retry recovers without changing the alert window. |
+| SLICE-10 | `catalogue-inventory.spec.js` | Empty inventory shows zero summaries and a clear empty state. |
+| SLICE-11 | `catalogue-inventory.spec.js` | Pharmacist is redirected away from manager-only low-stock administration. |
 | SUP-01 | `suppliers.spec.js` | Successful deactivation changes visible supplier status. |
 | SUP-02 | `suppliers.spec.js` | Failed deactivation shows the server error and keeps the supplier active. |
 | SUP-03 | `suppliers.spec.js` | Supplier form sends the expected create payload and displays confirmation. |
